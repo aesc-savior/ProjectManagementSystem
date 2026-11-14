@@ -15,7 +15,7 @@
 | 页面 | JSP + 手写 CSS |
 | 数据访问 | 原生 JDBC + 拼接 SQL |
 | 数据库 | MySQL 8.0，表前缀 `da_`，字符集 utf8mb4 |
-| 密码 | 随机盐 + MD5(盐+密码)，与 DeviceDemo 的 `PasswordUtil` 算法一致 |
+| 密码 | 随机盐 + MD5(盐+密码) |
 | 上传 | `Part` API（`@MultipartConfig` / web.xml `multipart-config`），单文件 ≤200MB |
 
 ## 二、目录结构
