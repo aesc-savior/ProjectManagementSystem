@@ -10,10 +10,10 @@
 
 | 项 | 版本 / 说明 |
 |---|---|
-| JDK | 17（DeviceDemo 同款） |
-| Web 容器 | Tomcat 10.1（Servlet 6，`jakarta.servlet.*`） |
-| 页面 | JSP + 手写 CSS（不依赖 Metronic，改起来轻） |
-| 数据访问 | 原生 JDBC + 拼接 SQL（与 DeviceDemo 一致，便于课程讲解） |
+| JDK | 17 |
+| Web 容器 | Tomcat 10.1 |
+| 页面 | JSP + 手写 CSS |
+| 数据访问 | 原生 JDBC + 拼接 SQL |
 | 数据库 | MySQL 8.0，表前缀 `da_`，字符集 utf8mb4 |
 | 密码 | 随机盐 + MD5(盐+密码)，与 DeviceDemo 的 `PasswordUtil` 算法一致 |
 | 上传 | `Part` API（`@MultipartConfig` / web.xml `multipart-config`），单文件 ≤200MB |
@@ -54,7 +54,7 @@
 create database archive default charset utf8mb4 collate utf8mb4_general_ci;
 ```
 
-然后执行 `sql/archive.sql`（建 6 张表 + 演示数据）。
+然后运行文件 `sql/archive.sql`（建 6 张表 + 演示数据）。
 
 ### 2. 改数据库连接（只有一处）
 
@@ -82,13 +82,9 @@ PASSWORD = "123456";
 3. 把 `web/WEB-INF/lib/*.jar` 全部 `Add as Library`（DeviceDemo 的 `.iml` 也是这么配的）。
 4. `Run → Edit Configurations → + Tomcat Server → Local`，Deployment 里加 **Artifact: archive-demo:war exploded**，
    Application context 填 **`/archive`**。
-5. 启动，访问 `http://localhost:8080/archive/`。
+5. 启动。
 
-> 手工部署（不用 IDEA）：把 `web` 目录整体作为 docBase，在 `conf/Catalina/localhost/` 下建 `archive.xml`：
-> ```xml
-> <Context docBase="D:/apps/archive" path="/archive" reloadable="false" />
-> ```
-> 并把 `web/WEB-INF/classes` 与 `web/WEB-INF/lib` 一起带上。
+
 
 ### 4. 演示账号（密码都是 `123456`）
 
@@ -101,7 +97,7 @@ PASSWORD = "123456";
 
 ## 四、已实现并验证过的功能
 
-本框架已在本机（Tomcat 10.1 + MySQL 8）实际跑通以下链路，不是“写完没跑”：
+本框架已在本机（Tomcat 10.1 + MySQL 8）实际跑通以下链路：
 
 | 功能 | 入口 | 验证结果 |
 |---|---|---|
@@ -138,39 +134,3 @@ PASSWORD = "123456";
 > 这套“页面 → Servlet 分发 action → DAO 拼 SQL → Db 执行”的结构，就是 DeviceDemo 的结构，
 > 只是把 `device` 换成 `archive`、把 JSON 返回换成了服务端渲染。
 
-## 六、下一步建议（按优先级）
-
-1. **补统计接口**：`ArchiveDao.stats()` 已经有 7 个指标，接到 ECharts 就是一页统计（F-064/072）。
-2. **补借阅提醒**：加一个定时任务扫描 `da_borrow` 的 `end_date`，到期前 1 天写消息（F-035）。
-3. **补批量导入**：用 POI 读 Excel（DeviceDemo 的 `WEB-INF/lib` 里有 poi-3.8）写 `ArchiveDao.importExcel()`（F-002）。
-4. **补权限细化**：现在是“角色 + 密级”，可再加 `da_menu`/`da_role_menu` 做菜单级配置（F-051 完整版）。
-5. **换 UI**：如果答辩要求好看，把 `assets/css/app.css` 换成 Metronic 的样式即可，页面结构不用动。
-
-## 七、常见问题
-
-| 现象 | 原因 / 处理 |
-|---|---|
-| 启动报 `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | `WEB-INF/lib` 里缺 mysql-connector，或没 Add as Library |
-| 500 且日志 `Unknown database 'archive'` | 没建库，或 `Db.java` 里的库名不对 |
-| 500 `Access denied for user` | 账号密码不对；注意 MySQL 8 需要 `allowPublicKeyRetrieval=true` |
-| 中文乱码 | 连接串带 `characterEncoding=UTF-8`；JSP 已声明 `pageEncoding="UTF-8"` |
-| 上传报 `FileSizeLimitExceeded` | 超过 200MB；改 `web.xml` 的 `max-file-size` 与 `@MultipartConfig` |
-| 页面 404 `/archive/` | IDEA 的 Application context 没设成 `/archive` |
-| JSP 改了不生效 | `reloadable` 为 false 时需重启；开发期可改成 true |
-
-## 八、与 DeviceDemo 的对应关系
-
-| DeviceDemo | 本框架 | 说明 |
-|---|---|---|
-| `src/device/dao/Db.java` | `src/archive/dao/Db.java` | 连接参数改为可配置，补 try-with-resources |
-| `src/device/dao/DeviceDao.java` | `src/archive/dao/ArchiveDao.java` | 表从 project_todo 换成 da_archive，加了分类/附件/统计 |
-| `src/device/dao/Data.java`（JSON 包装） | 不再需要 | 改服务端渲染，直接用 Map 传参 |
-| `src/user/center/ServletAction.java` | `src/archive/web/AuthServlet.java` | 去掉 JSON 分支，直接重定向 |
-| `src/user/filter/LoginFilter.java` | `src/archive/filter/LoginFilter.java` | 放行规则保留，路径改为本项目的 |
-| `src/user/util/PasswordUtil.java` | `src/archive/util/PasswordUtil.java` | 算法完全一致 |
-| `web/device/file/*.jsp` | `web/archive/*.jsp` | 从简单页升级为统一布局 |
-| `web/home/frame/*.jsp` | `web/WEB-INF/inc/head.jsp`、`foot.jsp` | 菜单从数据库驱动改成按角色静态渲染，少一层依赖 |
-
----
-
-**一句话**：把这份骨架 clone 下来，改 `Db.java` 的库名密码、跑一遍 SQL、配好 Tomcat，就能登录进系统看到 6 条档案、上传附件、走一遍借阅审批。剩下的按功能清单往里填模块即可。
