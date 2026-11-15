@@ -134,3 +134,4 @@ PASSWORD = "123456";
 > 这套“页面 → Servlet 分发 action → DAO 拼 SQL → Db 执行”的结构，就是 DeviceDemo 的结构，
 > 只是把 `device` 换成 `archive`、把 JSON 返回换成了服务端渲染。
 
+测试 --GrayRaven70
