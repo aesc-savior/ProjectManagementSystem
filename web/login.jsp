@@ -11,14 +11,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>登录 · 档案管理系统</title>
+    <title>登录 · 项目管理系统</title>
     <link rel="stylesheet" href="<%= ctx %>/assets/css/app.css">
 </head>
 <body>
 <div class="login-page">
     <div class="login-card">
-        <h1>档案管理系统</h1>
-        <div class="sub">统一档案入口</div>
+        <h1>项目管理系统</h1>
+        <div class="sub">项目 · 任务 · 周报 · 审批 · 统计</div>
 
         <% if ("1".equals(request.getParameter("error"))) { %>
         <div class="alert alert-error">账号或密码错误，或被停用。</div>
@@ -42,8 +42,8 @@
         </form>
 
         <div class="demo">
-            演示账号：admin / archivist / user，密码均为 123456<br>
-
+            演示账号：admin / pm / member / viewer，密码均为 123456<br>
+            管理员、项目经理、成员、查看者看到的菜单与按钮不同
         </div>
     </div>
 </div>

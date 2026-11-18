@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.*" %>
+<%@ page import="pm.dao.*,java.util.*" %>
 <% String pageTitle = "用户管理"; String active = "user"; %>
-<%@ include file="/WEB-INF/inc/head.jsp" %>
+<%@ include file="/WEB-INF/inc/head.jspf" %>
 <%
     List<Map<String, String>> rows = (List<Map<String, String>>) request.getAttribute("rows");
     if (rows == null) rows = new ArrayList<Map<String, String>>();
@@ -35,30 +35,24 @@
     <div class="empty">没有符合条件的用户。</div>
     <% } else { %>
     <table class="grid">
-        <thead>
-        <tr><th>姓名</th><th>登录账号</th><th>角色</th><th>部门</th><th>密级</th><th>状态</th><th>创建时间</th><th>操作</th></tr>
-        </thead>
+        <thead><tr><th>姓名</th><th>账号</th><th>角色</th><th>部门</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
         <tbody>
         <% for (Map<String, String> u : rows) { %>
         <tr>
             <td><%= h(u.get("user_name")) %></td>
-            <td><%= h(u.get("login_id")) %></td>
+            <td class="mono"><%= h(u.get("login_id")) %></td>
             <td><%= roleTextOf(u.get("role_code")) %></td>
             <td><%= h(u.get("dept_name")) %></td>
-            <td><%= secretText(u.get("secret_level")) %></td>
-            <td>
-                <span class="<%= "NORMAL".equals(u.get("status")) ? "badge badge-normal" : "badge badge-disabled" %>">
-                    <%= "NORMAL".equals(u.get("status")) ? "正常" : "停用" %>
-                </span>
-            </td>
+            <td><span class="<%= "NORMAL".equals(u.get("status")) ? "badge badge-normal" : "badge badge-disabled" %>">
+                <%= "NORMAL".equals(u.get("status")) ? "正常" : "停用" %></span></td>
             <td class="nowrap"><%= h(u.get("create_time")) %></td>
             <td class="ops">
                 <a class="btn btn-sm" href="<%= ctx %>/user?action=editForm&id=<%= u.get("id") %>">编辑</a>
                 <form method="post" action="<%= ctx %>/user?action=toggle&id=<%= u.get("id") %>" style="display:inline">
                     <button class="btn btn-sm" type="submit"><%= "NORMAL".equals(u.get("status")) ? "停用" : "启用" %></button>
                 </form>
-                <form method="post" action="<%= ctx %>/user?action=delete&id=<%= u.get("id") %>"
-                      style="display:inline" onsubmit="return confirm('确认删除该用户？')">
+                <form method="post" action="<%= ctx %>/user?action=delete&id=<%= u.get("id") %>" style="display:inline"
+                      onsubmit="return confirm('确认删除该用户？')">
                     <button class="btn btn-sm btn-danger" type="submit">删除</button>
                 </form>
             </td>
@@ -68,4 +62,4 @@
     </table>
     <% } %>
 </div>
-<%@ include file="/WEB-INF/inc/foot.jsp" %>
+<%@ include file="/WEB-INF/inc/foot.jspf" %>

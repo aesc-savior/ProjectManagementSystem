@@ -5,12 +5,12 @@
                              https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <display-name>档案管理系统</display-name>
+    <display-name>项目管理系统</display-name>
 
     <!-- 登录过滤器：未登录跳登录页 -->
     <filter>
         <filter-name>LoginFilter</filter-name>
-        <filter-class>archive.filter.LoginFilter</filter-class>
+        <filter-class>pm.filter.LoginFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>LoginFilter</filter-name>
@@ -20,17 +20,47 @@
     <!-- 登录 / 退出 -->
     <servlet>
         <servlet-name>auth</servlet-name>
-        <servlet-class>archive.web.AuthServlet</servlet-class>
+        <servlet-class>pm.web.AuthServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>auth</servlet-name>
         <url-pattern>/auth</url-pattern>
     </servlet-mapping>
 
-    <!-- 档案模块（含附件上传，需 multipart 配置） -->
+    <!-- 项目 -->
     <servlet>
-        <servlet-name>archive</servlet-name>
-        <servlet-class>archive.web.ArchiveServlet</servlet-class>
+        <servlet-name>project</servlet-name>
+        <servlet-class>pm.web.ProjectServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>project</servlet-name>
+        <url-pattern>/project</url-pattern>
+    </servlet-mapping>
+
+    <!-- 任务 -->
+    <servlet>
+        <servlet-name>task</servlet-name>
+        <servlet-class>pm.web.TaskServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>task</servlet-name>
+        <url-pattern>/task</url-pattern>
+    </servlet-mapping>
+
+    <!-- 周报 -->
+    <servlet>
+        <servlet-name>weekly</servlet-name>
+        <servlet-class>pm.web.WeeklyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>weekly</servlet-name>
+        <url-pattern>/weekly</url-pattern>
+    </servlet-mapping>
+
+    <!-- 文档（含上传，multipart 配置） -->
+    <servlet>
+        <servlet-name>doc</servlet-name>
+        <servlet-class>pm.web.DocServlet</servlet-class>
         <multipart-config>
             <max-file-size>209715200</max-file-size>
             <max-request-size>220200960</max-request-size>
@@ -38,38 +68,78 @@
         </multipart-config>
     </servlet>
     <servlet-mapping>
-        <servlet-name>archive</servlet-name>
-        <url-pattern>/archive</url-pattern>
+        <servlet-name>doc</servlet-name>
+        <url-pattern>/doc</url-pattern>
+    </servlet-mapping>
+
+    <!-- 公告 -->
+    <servlet>
+        <servlet-name>notice</servlet-name>
+        <servlet-class>pm.web.NoticeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>notice</servlet-name>
+        <url-pattern>/notice</url-pattern>
+    </servlet-mapping>
+
+    <!-- 审批 -->
+    <servlet>
+        <servlet-name>approval</servlet-name>
+        <servlet-class>pm.web.ApprovalServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>approval</servlet-name>
+        <url-pattern>/approval</url-pattern>
+    </servlet-mapping>
+
+    <!-- 罚款 -->
+    <servlet>
+        <servlet-name>fine</servlet-name>
+        <servlet-class>pm.web.FineServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>fine</servlet-name>
+        <url-pattern>/fine</url-pattern>
+    </servlet-mapping>
+
+    <!-- 统计 -->
+    <servlet>
+        <servlet-name>stat</servlet-name>
+        <servlet-class>pm.web.StatServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>stat</servlet-name>
+        <url-pattern>/stat</url-pattern>
     </servlet-mapping>
 
     <!-- 用户管理 -->
     <servlet>
         <servlet-name>user</servlet-name>
-        <servlet-class>archive.web.UserServlet</servlet-class>
+        <servlet-class>pm.web.UserServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>user</servlet-name>
         <url-pattern>/user</url-pattern>
     </servlet-mapping>
 
-    <!-- 借阅 -->
-    <servlet>
-        <servlet-name>borrow</servlet-name>
-        <servlet-class>archive.web.BorrowServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>borrow</servlet-name>
-        <url-pattern>/borrow</url-pattern>
-    </servlet-mapping>
-
-    <!-- 日志 -->
+    <!-- 操作日志 -->
     <servlet>
         <servlet-name>log</servlet-name>
-        <servlet-class>archive.web.LogServlet</servlet-class>
+        <servlet-class>pm.web.LogServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>log</servlet-name>
         <url-pattern>/log</url-pattern>
+    </servlet-mapping>
+
+    <!-- 第三方 REST 接口 -->
+    <servlet>
+        <servlet-name>api</servlet-name>
+        <servlet-class>pm.web.ApiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>api</servlet-name>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>

@@ -1,8 +1,9 @@
-# 档案管理系统 · 基础框架（archive-demo）
+# 项目管理系统（ProjectManagementSystem）· 可运行骨架
 
-基于 `DeviceDemo` 的网页框架改造而来：把 device 业务换成档案业务，并补上了分类、借阅、日志、附件上传。
+由原 **档案管理系统** 代码框架重构而来：同样的 **Servlet 6 + JSP + 原生 JDBC + session/filter 登录**，业务换成项目管理。
+配套文档：`项目管理系统-需求规格说明书（V1.0）.docx`、`项目管理系统-功能清单台账.xlsx`（PM-001～PM-123）。
 
-> 定位：**可运行的骨架**，不是成品。
+> 定位：**可运行骨架**。把“登录 → 项目 → 任务 → 周报 → 审批 → 统计”的主线跑通，其余模块可按同一模式复制。
 
 ---
 
@@ -11,127 +12,138 @@
 | 项 | 版本 / 说明 |
 |---|---|
 | JDK | 17 |
-| Web 容器 | Tomcat 10.1 |
-| 页面 | JSP + 手写 CSS |
-| 数据访问 | 原生 JDBC + 拼接 SQL |
-| 数据库 | MySQL 8.0，表前缀 `da_`，字符集 utf8mb4 |
-| 密码 | 随机盐 + MD5(盐+密码) |
-| 上传 | `Part` API（`@MultipartConfig` / web.xml `multipart-config`），单文件 ≤200MB |
+| Web 容器 | Tomcat 10.1（Servlet 6，`jakarta.servlet.*`） |
+| 页面 | JSP + 手写 CSS（`web/assets/css/app.css`），无前端构建 |
+| 数据访问 | 原生 JDBC + 拼接 SQL（课程框架风格） |
+| 数据库 | MySQL 8.0，库名 `pm`，表前缀 `pm_`，utf8mb4 |
+| 密码 | 随机盐 + MD5(盐+密码)，`pm.util.PasswordUtil` |
+| 上传 | `Part` API，单文件 ≤200MB，落盘目录可配置 |
 
-## 二、目录结构
+## 二、已实现模块（对应 SRS 条目）
+
+| 模块 | 功能 | 主要条目 |
+|---|---|---|
+| 登录 / 角色 | 登录、退出、4 角色（ADMIN/PM/MEMBER/VIEWER）、按角色菜单 | PM-098～PM-111 |
+| 首页概览 | 可见项目数、我的待办、待我审批、未缴罚款、项目状态图、逾期任务 | PM-096 等 |
+| 项目 | 建档（编号自动）、编辑、状态流转、归档、删除、成员管理、组合查询 + 自定义排序 + 分页、详情 | PM-001～PM-013 |
+| 任务 | 创建、WBS 父子任务、负责人、优先级、状态/进度、父任务进度自动汇总、组合查询、进度快更 | PM-014～PM-029 |
+| 周报 | 填写、提交、撤回前修改、项目经理评语/评分/退回、按项目/人/周/状态查询 | PM-030～PM-038 |
+| 文档 | 上传（类型白名单）、下载、删除、按项目/关键词查询、同名自动版本号 | PM-039～PM-048 |
+| 公告 | 发布（全员/项目）、签收、签收人数、删除、查询 | PM-049～PM-055 |
+| 审批 | 任务延期申请（新截止日 + 原因）、待我审批、通过/驳回（通过后自动改任务截止日） | PM-080～PM-087 |
+| 罚款 | 按超期天数 ×100 元生成罚款单、模拟微信支付、台账 | PM-084～PM-087 |
+| 统计 | 项目/任务/周报状态分布、任务完成率、预算、未缴罚款、近 6 个月新增项目 | PM-088～PM-097 |
+| 用户 | 增删改查、启停、重置密码（ADMIN） | PM-098～PM-099 |
+| 日志 | 登录、增删改、提交、审批、上传下载、支付留痕，可按动作/关键词筛 | PM-104 |
+| 第三方接口 | `GET /api/projects?status=&type=`、`GET /api/projects/{id}`、`DELETE /api/projects/{id}`，Bearer Token | PM-109 |
+
+**尚未实现（下一步按 SRS 补）**：会议与纪要（PM-056～PM-062）、资产与合同（PM-063～PM-072）、甘特图（PM-024）、个人/团队驾驶舱（PM-096/097 的图形化版本）、微信小程序端（PM-112～PM-123）、真实微信支付（当前为模拟）、气象采集、备份恢复、字典配置。
+
+## 三、目录结构
 
 ```
-档案管理系统-基础框架/
-├─ sql/archive.sql            建库建表 + 演示数据（4 个账号、7 个分类、6 条档案）
-├─ src/archive/
-│  ├─ dao/                    Db / ArchiveDao / UserDao / BorrowDao / LogDao
-│  ├─ filter/LoginFilter.java 未登录拦到登录页
+ArchivesManagementSystem（目录名暂未改，项目内容已是 PM 系统）
+├─ sql/pm.sql                 建库建表 + 演示数据（4 账号、5 项目、10 任务、4 周报、2 公告）
+├─ src/pm/
+│  ├─ dao/                    Db / UserDao / ProjectDao / TaskDao / WeeklyDao / DocDao / NoticeDao / ApprovalDao / FineDao / LogDao
+│  ├─ filter/LoginFilter.java 未登录跳登录页；/api/* 交 ApiServlet 校验 Token
 │  ├─ util/PasswordUtil.java  盐 + MD5
-│  └─ web/                    AuthServlet / ArchiveServlet / UserServlet / BorrowServlet / LogServlet / Web
+│  └─ web/                    Auth / Project / Task / Weekly / Doc / Notice / Approval / Fine / Stat / User / Log / Api
 ├─ web/
-│  ├─ login.jsp               登录页
-│  ├─ home/index.jsp          首页概览（统计卡 + 最近档案）
-│  ├─ archive/                list / form / view（列表、新增编辑、详情+附件+借阅）
-│  ├─ user/                   list / form（用户管理）
-│  ├─ borrow/list.jsp         我的借阅 / 待审批 / 全部记录
-│  ├─ log/list.jsp            操作日志
-│  ├─ WEB-INF/
-│  │  ├─ web.xml              过滤器 + 5 个 Servlet 映射 + multipart 配置
-│  │  ├─ inc/head.jsp         公共头（顶栏 + 侧边菜单，按角色显示）
-│  │  ├─ inc/foot.jsp         公共尾
-│  │  ├─ lib/                 mysql-connector-java-8.0.20.jar
-│  │  └─ classes/             已编译的 class（可直接部署；IDEA 会覆盖）
-│  └─ assets/css/app.css      全站样式
-└─ README.md
+│  ├─ login.jsp  index.jsp  home/index.jsp
+│  ├─ project/  task/  weekly/  doc/  notice/  approval/  fine/  stat/  user/  log/
+│  ├─ WEB-INF/web.xml         过滤器 + 12 个 Servlet 映射 + multipart
+│  ├─ WEB-INF/inc/head.jspf   公共头（菜单按角色 + 标签辅助方法）
+│  ├─ WEB-INF/inc/foot.jspf   公共尾
+│  ├─ WEB-INF/classes/pm/     已编译 class（手工部署用；IDEA 会覆盖）
+│  └─ assets/css/app.css
+└─ 项目管理系统-需求规格说明书（V1.0）.docx
+   项目管理系统-功能清单台账.xlsx
+   项目管理系统-功能清单.docx
 ```
 
-## 三、跑起来（三步）
+## 四、跑起来（三步）
 
 ### 1. 建库
 
 ```sql
 -- 用 Navicat / 命令行都行
-create database archive default charset utf8mb4 collate utf8mb4_general_ci;
+create database pm default charset utf8mb4 collate utf8mb4_general_ci;
 ```
 
-然后运行文件 `sql/archive.sql`（建 6 张表 + 演示数据）。
+然后执行 `sql/pm.sql`（会重建 `pm_*` 表并写入演示数据）。
 
-### 2. 改数据库连接（只有一处）
+### 2. 数据库连接
 
-打开 `src/archive/dao/Db.java`，改这三行的默认值：
+`src/pm/dao/Db.java` 默认：
 
 ```java
-URL      = "jdbc:mysql://localhost:3306/archive?...";
+URL      = "jdbc:mysql://localhost:3366/pm?...";
 USER     = "root";
 PASSWORD = "123456";
 ```
 
-不想改代码，也可以在 Tomcat 的 VM options 里加：
+也可用 JVM 参数覆盖：
 
 ```
--Darchive.db.url="jdbc:mysql://localhost:3366/archive?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
--Darchive.db.user=root
--Darchive.db.password=你的密码
--Darchive.upload.dir=D:/archive-upload
+-Dpm.db.url="jdbc:mysql://localhost:3366/pm?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+-Dpm.db.user=root
+-Dpm.db.password=你的密码
+-Dpm.upload.dir=D:/pm-upload
+-Dpm.api.token=pm-demo-token
 ```
 
-### 3. 用 IDEA 打开并配置
+### 3. IDEA 配置
 
-1. `File → Open` 选择本目录（不要选成 DeviceDemo）。
-2. `Project Structure → SDK` 选 JDK 17。
-3. 把 `web/WEB-INF/lib/*.jar` 全部 `Add as Library`（DeviceDemo 的 `.iml` 也是这么配的）。
-4. `Run → Edit Configurations → + Tomcat Server → Local`，Deployment 里加 **Artifact: archive-demo:war exploded**，
-   Application context 填 **`/archive`**。
-5. 启动。
+1. `Project Structure → SDK` 选 JDK 17；
+2. `web/WEB-INF/lib/*.jar` 全部 `Add as Library`；
+3. `Run → Edit Configurations → Tomcat Server → Local`，Deployment 加 **Artifact: war exploded**，
+   **Application context 填 `/pm`**；
+4. 启动后访问 `http://localhost:9999/pm/`（端口以本机 Tomcat `server.xml` 为准）。
 
+> 手工部署：把 `web` 目录作为 docBase，在 `Tomcat/conf/Catalina/localhost/` 下建 `pm.xml`：
+> ```xml
+> <Context docBase="D:/apps/pm" path="/pm" reloadable="false" />
+> ```
+> 并带上 `web/WEB-INF/classes` 与 `web/WEB-INF/lib`。
 
-
-### 4. 演示账号（密码都是 `123456`）
+## 五、演示账号（密码都是 `123456`）
 
 | 账号 | 角色 | 能做什么 |
 |---|---|---|
-| `admin` | 系统管理员（密级 4） | 全部 + 用户管理 + 日志 |
-| `archivist` | 档案管理员（密级 3） | 档案增删改、归档、上传、审批借阅、看日志 |
-| `user` | 部门用户（密级 2） | 检索、查看、下载、申请借阅 |
-| `wangwu` | 部门用户（密级 1） | 同上，但只能看公开级档案 |
+| `admin` | 系统管理员 | 全部数据、用户管理、日志、生成罚款 |
+| `pm` | 项目经理 | 本人负责的项目、任务分配、审批、周报审核、罚款 |
+| `member` | 项目成员 | 本人参与项目、任务进度、周报提交、文档上传、公告签收 |
+| `viewer` | 查看者 | 只读可见项目（无新增/编辑/审批按钮） |
 
-## 四、已实现并验证过的功能
+## 六、第三方接口示例
 
-本框架已在本机（Tomcat 10.1 + MySQL 8）实际跑通以下链路：
+```bash
+# 查询（≥2 个组合条件）
+curl -H "Authorization: Bearer pm-demo-token" \
+     "http://localhost:9999/pm/api/projects?status=RUNNING&type=RND"
 
-| 功能 | 入口 | 验证结果 |
-|---|---|---|
-| 登录 / 退出 / 会话 | `/auth` | admin 登录后跳首页；未登录访问业务页 302 到登录页 |
-| 角色控制 | 各 Servlet + JSP | 部门用户访问 `/user` 被 302 回首页并提示“只有系统管理员可以管理用户” |
-| 密级控制 | 档案详情 | 密级 2 的用户打开 4 级档案，页面显示“密级不足”且不返回正文 |
-| 档案列表 + 组合查询 | `/archive?action=list` | 分类/年度/密级/状态/关键词 5 个条件，分页 10 条 |
-| 新增档案 | `/archive?action=save` | 自动生成 `DA-2026-0007`，保存后跳详情 |
-| 编辑 / 归档 / 逻辑删除 | `/archive?action=editForm|archive|delete` | 归档后状态变“已归档”并写归档时间 |
-| 附件上传 / 下载 / 删除 | `/archive?action=upload|download|deleteFile` | 上传后落盘、详情可见、可下载 |
-| 借阅申请 → 审批 → 归还 | `/borrow` | 申请后出现在待审批；通过后档案变“借出中”；日志记录 APPROVE |
-| 用户管理 | `/user` | 新增/编辑/停用/删除；管理员不可删除、不能停用自己 |
-| 操作日志 | `/log` | 登录、增删改、审批、上传下载全部留痕，可按动作与关键词筛 |
+# 删除（逻辑删除）
+curl -X DELETE -H "Authorization: Bearer pm-demo-token" \
+     "http://localhost:9999/pm/api/projects/1"
+```
 
-对应关系（功能清单编号 → 本框架）：
+未带 Token 或 Token 错误返回 `401`；返回体统一为 `{code,message,data}`。
 
-| 功能清单 | 状态 |
-|---|---|
-| F-001、F-004、F-009、F-013、F-016～F-018、F-025、F-028、F-041～F-043、F-050～F-053、F-056、F-064、F-079 | 已实现骨架 |
-| F-002 批量导入、F-007 断点续传、F-019 全文检索、F-032～F-035 完整借阅提醒、F-044/045 到期与延期、F-046～F-049 销毁、F-072 图表 | 待补 |
-| 小程序、驾驶舱、统计图表 | 未开始（建议按 W2 计划排） |
+## 七、设计约定
 
-## 五、代码怎么读（一次请求的完整路径）
+- **数据权限**：管理员看全部；其他角色看“自己负责 + 自己参与”的项目，任务/周报/文档/公告按项目联动。
+- **项目状态**：`PENDING → RUNNING → PAUSED/DONE/CANCELED → ARCHIVED`，归档后只读。
+- **任务进度**：父任务进度 = 子任务平均进度；任务 100% 自动置 `DONE`。
+- **周报**：同一人同一项目同一周唯一；提交后锁定，可被项目经理退回重写。
+- **文档版本**：同项目同名文件重复上传，版本号自动 +1。
+- **罚款**：超期天数 × 100 元；同一项目只允许一张未缴罚款单；支付为模拟回调（`trade_no=MOCK...`）。
+- **日志**：写日志失败不影响主流程（`LogDao` 内部捕获）。
 
-以“新增档案”为例：
+## 八、已知限制
 
-1. `web/archive/form.jsp` 表单 POST 到 `/archive?action=save`。
-2. `ArchiveServlet.doPost()` 判断 `action`，收集参数，调 `ArchiveDao.save()`。
-3. `ArchiveDao.save()` 拼接 SQL：新增时先 `nextArchiveNo()` 生成档号，再 `insert`。
-4. `Db.update()` 打开连接、执行、关闭（try-with-resources）。
-5. 保存后 `sendRedirect` 到详情页；`LogDao.write()` 记一条 ADD 日志。
-6. 详情页 `view.jsp` 用 `ArchiveDao.files()` 取附件，按角色显示“编辑/归档/上传/借阅”。
-
-> 这套“页面 → Servlet 分发 action → DAO 拼 SQL → Db 执行”的结构，就是 DeviceDemo 的结构，
-> 只是把 `device` 换成 `archive`、把 JSON 返回换成了服务端渲染。
-
-测试 --GrayRaven70
+- 会议、资产、合同、甘特图、驾驶舱、小程序尚未实现；
+- 微信支付、订阅消息为模拟，未接入真实商户号/AppID；
+- SQL 为字符串拼接（课程项目风格），生产应改 PreparedStatement；
+- 上传目录默认在系统临时目录，正式部署请设置 `-Dpm.upload.dir`；
+- 旧档案系统的表 `archive` 未被删除，如需清理请自行 `drop database archive`。

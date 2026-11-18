@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.*" %>
+<%@ page import="pm.dao.*,java.util.*" %>
 <% String pageTitle = "操作日志"; String active = "log"; %>
-<%@ include file="/WEB-INF/inc/head.jsp" %>
+<%@ include file="/WEB-INF/inc/head.jspf" %>
 <%
     List<Map<String, String>> rows = (List<Map<String, String>>) request.getAttribute("rows");
     if (rows == null) rows = new ArrayList<Map<String, String>>();
@@ -16,7 +16,7 @@
 <div class="page-title">
     <div>
         <h2>操作日志</h2>
-        <div class="sub">共 <b><%= total %></b> 条；登录、增删改、审批、上传下载都会留痕。</div>
+        <div class="sub">共 <b><%= total %></b> 条；登录、增删改、提交、审批、上传下载、支付都会留痕。</div>
     </div>
 </div>
 
@@ -32,10 +32,11 @@
                 <option value="UPDATE" <%= "UPDATE".equals(fAction) ? "selected" : "" %>>修改</option>
                 <option value="DELETE" <%= "DELETE".equals(fAction) ? "selected" : "" %>>删除</option>
                 <option value="ARCHIVE" <%= "ARCHIVE".equals(fAction) ? "selected" : "" %>>归档</option>
-                <option value="APPLY" <%= "APPLY".equals(fAction) ? "selected" : "" %>>借阅申请</option>
+                <option value="SUBMIT" <%= "SUBMIT".equals(fAction) ? "selected" : "" %>>提交</option>
                 <option value="APPROVE" <%= "APPROVE".equals(fAction) ? "selected" : "" %>>审批</option>
                 <option value="UPLOAD" <%= "UPLOAD".equals(fAction) ? "selected" : "" %>>上传</option>
                 <option value="DOWNLOAD" <%= "DOWNLOAD".equals(fAction) ? "selected" : "" %>>下载</option>
+                <option value="PAY" <%= "PAY".equals(fAction) ? "selected" : "" %>>支付</option>
             </select>
         </div>
         <div class="field grow">
@@ -54,23 +55,20 @@
     <div class="empty">没有日志记录。</div>
     <% } else { %>
     <table class="grid">
-        <thead>
-        <tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>说明</th><th>IP</th></tr>
-        </thead>
+        <thead><tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>说明</th><th>IP</th></tr></thead>
         <tbody>
         <% for (Map<String, String> r : rows) { %>
         <tr>
             <td class="nowrap"><%= h(r.get("create_time")) %></td>
             <td><%= h(r.get("user_name")) %></td>
             <td><span class="badge badge-borrowed"><%= h(r.get("action")) %></span></td>
-            <td><%= h(r.get("target")) %></td>
+            <td class="mono"><%= h(r.get("target")) %></td>
             <td><%= h(r.get("detail")) %></td>
             <td><%= h(r.get("ip")) %></td>
         </tr>
         <% } %>
         </tbody>
     </table>
-
     <div class="pager">
         <span class="info">第 <%= pageNo %> / <%= Math.max(pages, 1) %> 页</span>
         <% if (pageNo > 1) { %>
@@ -82,4 +80,4 @@
     </div>
     <% } %>
 </div>
-<%@ include file="/WEB-INF/inc/foot.jsp" %>
+<%@ include file="/WEB-INF/inc/foot.jspf" %>
