@@ -1,9 +1,9 @@
 # 项目管理系统（ProjectManagementSystem）· 可运行骨架
 
-由原 **档案管理系统** 代码框架重构而来：同样的 **Servlet 6 + JSP + 原生 JDBC + session/filter 登录**，业务换成项目管理。
+ **Servlet 6 + JSP + 原生 JDBC + session/filter 登录**。
 配套文档：`项目管理系统-需求规格说明书（V1.0）.docx`、`项目管理系统-功能清单台账.xlsx`（PM-001～PM-123）。
 
-> 定位：**可运行骨架**。把“登录 → 项目 → 任务 → 周报 → 审批 → 统计”的主线跑通，其余模块可按同一模式复制。
+> 定位：**可运行骨架**。把“登录 → 项目 → 任务 → 周报 → 审批 → 统计”的主线跑通。
 
 ---
 
@@ -116,21 +116,7 @@ PASSWORD = "123456";
 | `member` | 项目成员 | 本人参与项目、任务进度、周报提交、文档上传、公告签收 |
 | `viewer` | 查看者 | 只读可见项目（无新增/编辑/审批按钮） |
 
-## 六、第三方接口示例
-
-```bash
-# 查询（≥2 个组合条件）
-curl -H "Authorization: Bearer pm-demo-token" \
-     "http://localhost:9999/pm/api/projects?status=RUNNING&type=RND"
-
-# 删除（逻辑删除）
-curl -X DELETE -H "Authorization: Bearer pm-demo-token" \
-     "http://localhost:9999/pm/api/projects/1"
-```
-
-未带 Token 或 Token 错误返回 `401`；返回体统一为 `{code,message,data}`。
-
-## 七、设计约定
+## 六、设计约定
 
 - **数据权限**：管理员看全部；其他角色看“自己负责 + 自己参与”的项目，任务/周报/文档/公告按项目联动。
 - **项目状态**：`PENDING → RUNNING → PAUSED/DONE/CANCELED → ARCHIVED`，归档后只读。
@@ -139,11 +125,3 @@ curl -X DELETE -H "Authorization: Bearer pm-demo-token" \
 - **文档版本**：同项目同名文件重复上传，版本号自动 +1。
 - **罚款**：超期天数 × 100 元；同一项目只允许一张未缴罚款单；支付为模拟回调（`trade_no=MOCK...`）。
 - **日志**：写日志失败不影响主流程（`LogDao` 内部捕获）。
-
-## 八、已知限制
-
-- 会议、资产、合同、甘特图、驾驶舱、小程序尚未实现；
-- 微信支付、订阅消息为模拟，未接入真实商户号/AppID；
-- SQL 为字符串拼接（课程项目风格），生产应改 PreparedStatement；
-- 上传目录默认在系统临时目录，正式部署请设置 `-Dpm.upload.dir`；
-- 旧档案系统的表 `archive` 未被删除，如需清理请自行 `drop database archive`。
