@@ -1,0 +1,10 @@
+完整版的要求清单：
+XMXX-XXXXXXXXXX系统-开发进度月报1.doc
+XMXX-XXXXXXXXXX系统-开发进度月报2.doc
+XMXX-XXXXXXXXXX系统-开发进度月报3.doc
+XMXX-XXXXXXXXXX系统-项目开发总结报告(PDSR).doc
+XMXX-XXXXXXXXXX系统-结题申报表.doc
+XMXX-XXXXXXXXXX系统-项目结题费用分析报告.doc
+
+简化版的要求清单：
+XMXX-XXXXXXXXXX系统-项目开发总结报告.doc

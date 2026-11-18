@@ -1,0 +1,172 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%!
+    /* 输出转义，避免把用户输入当 HTML 渲染 */
+    private String h(Object v) {
+        if (v == null) return "";
+        String s = v.toString();
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
+    }
+
+    private String roleTextOf(String v) {
+        if ("ADMIN".equals(v)) return "系统管理员";
+        if ("PM".equals(v)) return "项目经理";
+        if ("VIEWER".equals(v)) return "查看者";
+        return "项目成员";
+    }
+
+    private String typeText(String v) {
+        if ("BUILD".equals(v)) return "建设";
+        if ("SERVICE".equals(v)) return "服务";
+        if ("OTHER".equals(v)) return "其他";
+        return "研发";
+    }
+
+    private String prioText(String v) {
+        if ("HIGH".equals(v)) return "高";
+        if ("LOW".equals(v)) return "低";
+        return "中";
+    }
+
+    private String prioBadge(String v) {
+        if ("HIGH".equals(v)) return "badge badge-rejected";
+        if ("LOW".equals(v)) return "badge badge-normal";
+        return "badge badge-borrowed";
+    }
+
+    private String projStatusText(String v) {
+        if ("RUNNING".equals(v)) return "进行中";
+        if ("PAUSED".equals(v)) return "暂停";
+        if ("DONE".equals(v)) return "已完成";
+        if ("CANCELED".equals(v)) return "已取消";
+        if ("ARCHIVED".equals(v)) return "已归档";
+        return "待启动";
+    }
+
+    private String projStatusBadge(String v) {
+        if ("RUNNING".equals(v)) return "badge badge-borrowed";
+        if ("PAUSED".equals(v)) return "badge badge-pending";
+        if ("DONE".equals(v)) return "badge badge-archived";
+        if ("CANCELED".equals(v)) return "badge badge-destroyed";
+        if ("ARCHIVED".equals(v)) return "badge badge-normal";
+        return "badge badge-pending";
+    }
+
+    private String taskStatusText(String v) {
+        if ("DOING".equals(v)) return "进行中";
+        if ("PAUSED".equals(v)) return "暂停";
+        if ("DONE".equals(v)) return "已完成";
+        if ("CANCELED".equals(v)) return "已取消";
+        return "待开始";
+    }
+
+    private String taskStatusBadge(String v) {
+        if ("DOING".equals(v)) return "badge badge-borrowed";
+        if ("PAUSED".equals(v)) return "badge badge-pending";
+        if ("DONE".equals(v)) return "badge badge-archived";
+        if ("CANCELED".equals(v)) return "badge badge-destroyed";
+        return "badge badge-pending";
+    }
+
+    private String weekStatusText(String v) {
+        if ("SUBMITTED".equals(v)) return "已提交";
+        if ("REVIEWED".equals(v)) return "已审核";
+        if ("REJECTED".equals(v)) return "已退回";
+        return "草稿";
+    }
+
+    private String weekStatusBadge(String v) {
+        if ("SUBMITTED".equals(v)) return "badge badge-borrowed";
+        if ("REVIEWED".equals(v)) return "badge badge-archived";
+        if ("REJECTED".equals(v)) return "badge badge-rejected";
+        return "badge badge-pending";
+    }
+
+    private String approvalText(String v) {
+        if ("APPROVED".equals(v)) return "已通过";
+        if ("REJECTED".equals(v)) return "已驳回";
+        return "待审批";
+    }
+
+    private String approvalBadge(String v) {
+        if ("APPROVED".equals(v)) return "badge badge-approved";
+        if ("REJECTED".equals(v)) return "badge badge-rejected";
+        return "badge badge-pending";
+    }
+
+    private String fineText(String v) {
+        return "PAID".equals(v) ? "已缴纳" : "未缴纳";
+    }
+
+    private String fineBadge(String v) {
+        return "PAID".equals(v) ? "badge badge-archived" : "badge badge-rejected";
+    }
+
+    private String money(String v) {
+        try {
+            return String.format("%,.2f", Double.parseDouble(v));
+        } catch (Exception e) {
+            return "0.00";
+        }
+    }
+%>
+<%
+    String ctx = request.getContextPath();
+    String curRole = (String) session.getAttribute("role");
+    if (curRole == null) curRole = "MEMBER";
+    String curName = (String) session.getAttribute("uname");
+    if (curName == null) curName = "";
+    String curDept = (String) session.getAttribute("dept");
+    if (curDept == null) curDept = "";
+    boolean isAdmin = "ADMIN".equals(curRole);
+    boolean isPm = "ADMIN".equals(curRole) || "PM".equals(curRole);
+    boolean isViewer = "VIEWER".equals(curRole);
+    String flash = request.getParameter("msg");
+%>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= h(pageTitle) %> · 项目管理系统</title>
+    <link rel="stylesheet" href="<%= ctx %>/assets/css/app.css">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">项目管理<small>v1.0</small></div>
+        <nav class="nav">
+            <div class="group">工作区</div>
+            <a class="<%= "home".equals(active) ? "active" : "" %>" href="<%= ctx %>/home/index.jsp">首页概览</a>
+            <a class="<%= "project".equals(active) ? "active" : "" %>" href="<%= ctx %>/project?action=list">项目管理</a>
+            <a class="<%= "task".equals(active) ? "active" : "" %>" href="<%= ctx %>/task?action=list">任务管理</a>
+            <a class="<%= "weekly".equals(active) ? "active" : "" %>" href="<%= ctx %>/weekly?action=list">项目周报</a>
+            <a class="<%= "doc".equals(active) ? "active" : "" %>" href="<%= ctx %>/doc?action=list">项目文档</a>
+            <a class="<%= "notice".equals(active) ? "active" : "" %>" href="<%= ctx %>/notice?action=list">通知公告</a>
+            <div class="group">流程与考核</div>
+            <a class="<%= "approval".equals(active) ? "active" : "" %>" href="<%= ctx %>/approval?action=list">审批中心</a>
+            <a class="<%= "fine".equals(active) ? "active" : "" %>" href="<%= ctx %>/fine?action=list">延期罚款</a>
+            <a class="<%= "stat".equals(active) ? "active" : "" %>" href="<%= ctx %>/stat?action=index">统计报表</a>
+            <div class="group">系统</div>
+            <% if (isAdmin) { %>
+            <a class="<%= "user".equals(active) ? "active" : "" %>" href="<%= ctx %>/user?action=list">用户管理</a>
+            <% } %>
+            <% if (isAdmin || "PM".equals(curRole)) { %>
+            <a class="<%= "log".equals(active) ? "active" : "" %>" href="<%= ctx %>/log?action=list">操作日志</a>
+            <% } %>
+        </nav>
+    </aside>
+    <div class="main">
+        <header class="topbar">
+            <div class="who">当前登录：<b><%= h(curName) %></b>
+                <span class="muted">（<%= roleTextOf(curRole) %><%= curDept.isEmpty() ? "" : "，" + h(curDept) %>）</span>
+            </div>
+            <div class="flex">
+                <a class="btn btn-sm" href="<%= ctx %>/home/index.jsp">首页</a>
+                <a class="btn btn-sm" href="<%= ctx %>/auth?action=logout">退出</a>
+            </div>
+        </header>
+        <main class="content">
+            <% if (flash != null && !flash.trim().isEmpty()) { %>
+            <div class="alert alert-info"><%= h(flash) %></div>
+            <% } %>

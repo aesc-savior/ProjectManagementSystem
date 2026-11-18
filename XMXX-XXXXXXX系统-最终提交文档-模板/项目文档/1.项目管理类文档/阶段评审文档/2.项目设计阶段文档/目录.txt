@@ -1,0 +1,14 @@
+按照2006国标来：
+XMXX-XXXXXXXXXX系统-数据库设计说明书.doc
+XMXX-XXXXXXXXXX系统-数据需求说明书.doc
+XMXX-XXXXXXXXXX系统-概要设计说明书.doc
+XMXX-XXXXXXXXXX系统-软件(结构)设计说明(SDD).doc
+XMXX-XXXXXXXXXX系统-软件需求规格说明(SRS).doc
+XMXX-XXXXXXXXXX系统-需求规格说明书.doc
+XMXX-XXXXXXXXXX系统-项目设计评审表.doc
+
+简化版-或者按照1998国标来：
+XMXX-XXXXXXXXXX系统-数据库设计说明书.doc
+XMXX-XXXXXXXXXX系统-软件需求规格说明书.doc
+XMXX-XXXXXXXXXX系统-概要设计说明书.doc
+XMXX-XXXXXXXXXX系统-详细设计说明书.doc

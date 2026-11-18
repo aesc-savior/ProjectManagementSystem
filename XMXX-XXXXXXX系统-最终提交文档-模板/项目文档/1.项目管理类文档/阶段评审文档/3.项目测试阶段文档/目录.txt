@@ -1,0 +1,4 @@
+必须要写的文档：
+XMXX-XXXXXXXXXX系统-软件测试计划.doc
+XMXX-XXXXXXXXXX系统-软件测试记录.doc
+XMXX-XXXXXXXXXX系统-软件测试报告.doc
