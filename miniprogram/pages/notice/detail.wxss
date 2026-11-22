@@ -1,0 +1,27 @@
+.title {
+  font-size: 34rpx;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 14rpx;
+  font-size: 23rpx;
+  color: #9ca3af;
+}
+
+.content {
+  font-size: 28rpx;
+  color: #374151;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.signed-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #9ca3af;
+  padding: 24rpx 0;
+}

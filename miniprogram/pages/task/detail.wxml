@@ -1,0 +1,75 @@
+<view class="page" wx:if="{{task}}">
+  <view class="card">
+    <view class="item-top">
+      <view class="item-title">{{task.title}}</view>
+      <mp-tag text="{{task.statusText}}" type="{{task.statusType}}" />
+    </view>
+    <view class="item-meta">
+      <text bindtap="toProject" class="brand-text">{{task.projectName}}</text>
+      <text>{{task.assignee}}</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="row"><text class="k">所属项目</text><text class="v">{{task.projectName}}</text></view>
+    <view class="row" wx:if="{{task.parentTitle}}"><text class="k">父任务</text><text class="v">{{task.parentTitle}}</text></view>
+    <view class="row"><text class="k">负责人</text><text class="v">{{task.assignee}}</text></view>
+    <view class="row"><text class="k">优先级</text><text class="v">{{task.priorityText}}</text></view>
+    <view class="row"><text class="k">计划开始</text><text class="v">{{task.startDate || '未设置'}}</text></view>
+    <view class="row">
+      <text class="k">截止日期</text>
+      <text class="v {{task.overdueDays > 0 ? 'danger-text' : ''}}">{{task.dueText}}（{{task.overdueText}}）</text>
+    </view>
+    <view class="row"><text class="k">工时</text><text class="v">预估 {{task.estimateHours || 0}}h / 实际 {{task.actualHours || 0}}h</text></view>
+    <view class="row" wx:if="{{task.description}}"><text class="k">任务说明</text><text class="v">{{task.description}}</text></view>
+  </view>
+
+  <view class="card" wx:if="{{canEdit}}">
+    <view class="card-title">更新进度</view>
+    <view class="card-sub">进度到 100% 任务自动置为已完成，父任务进度同步汇总</view>
+
+    <view class="slider-box">
+      <slider min="0" max="100" step="5" value="{{progress}}" activeColor="#2f6fed"
+              backgroundColor="#eef1f5" block-size="22" bindchange="onProgress" show-value />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">实际工时（小时，可填小数）</view>
+      <input class="form-input" type="digit" value="{{hours}}" bindinput="onHours" placeholder="如 12.5" placeholder-class="ph" />
+    </view>
+
+    <view class="btn-row mt24">
+      <view class="btn btn-plain" bindtap="quickDone">标记完成</view>
+      <view class="btn btn-primary {{saving ? 'disabled' : ''}}" bindtap="saveProgress">
+        {{saving ? '保存中…' : '保存进度'}}
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">延期申请</view>
+    <view class="card-sub">任务做不完时提前申请，审批通过后截止日自动更新</view>
+    <view class="btn btn-plain mt24" bindtap="applyDelay">申请延期</view>
+  </view>
+
+  <view class="card" wx:if="{{children.length}}">
+    <view class="card-title">子任务（{{children.length}}）</view>
+    <view class="child" wx:for="{{children}}" wx:key="id">
+      <view class="flex1">
+        <view class="child-title">{{item.title}}</view>
+        <view class="hint">{{item.assignee}} · {{item.progress}}%</view>
+      </view>
+      <mp-tag text="{{item.statusText}}" type="{{item.statusType}}" />
+    </view>
+  </view>
+
+  <view class="footer-space"></view>
+</view>
+
+<view class="page" wx:elif="{{loading}}">
+  <mp-empty text="正在加载…" />
+</view>
+
+<view class="page" wx:else>
+  <mp-empty text="加载失败" sub="{{error}}" action="重试" bind:action="load" />
+</view>

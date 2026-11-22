@@ -1,0 +1,19 @@
+.mp-loadmore {
+  padding: 30rpx 0 10rpx;
+  text-align: center;
+}
+
+.mp-loadmore-text {
+  font-size: 23rpx;
+  color: #b6bdc9;
+}
+
+.mp-loadmore-text .mp-loadmore-dot {
+  display: inline-block;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #c3cbd8;
+  margin-right: 6rpx;
+  vertical-align: middle;
+}

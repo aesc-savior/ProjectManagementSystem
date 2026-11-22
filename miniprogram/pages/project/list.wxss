@@ -1,0 +1,49 @@
+/* page 级公共样式在 app.wxss，这里只放本页特有的 */
+.stat-grid {
+  margin-bottom: 8rpx;
+}
+
+.notice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding: 22rpx 26rpx;
+  background: #fdf3e3;
+  border-radius: 20rpx;
+  font-size: 25rpx;
+  color: #b45309;
+}
+
+.notice-bar .arrow {
+  color: #d97706;
+}
+
+.search .ph {
+  color: #b6bdc9;
+}
+
+.search .clear {
+  width: 44rpx;
+  text-align: center;
+  color: #b6bdc9;
+  font-size: 34rpx;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  margin-top: 6rpx;
+}
+
+.pct {
+  margin-left: 16rpx;
+  font-size: 23rpx;
+  color: #8a94a6;
+  width: 70rpx;
+  text-align: right;
+}
+
+.more {
+  color: #2f6fed;
+}

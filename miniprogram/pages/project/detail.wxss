@@ -1,0 +1,40 @@
+.progress-row {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.pct {
+  margin-left: 16rpx;
+  font-size: 23rpx;
+  color: #8a94a6;
+  width: 70rpx;
+  text-align: right;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eef1f5;
+}
+
+.member:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  background: #eaf1fe;
+  color: #2f6fed;
+  font-size: 28rpx;
+  line-height: 68rpx;
+  text-align: center;
+  margin-right: 20rpx;
+}
+
+.m-name {
+  font-size: 27rpx;
+}

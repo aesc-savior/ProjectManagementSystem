@@ -1,0 +1,22 @@
+.slider-box {
+  padding: 20rpx 8rpx 0;
+}
+
+.form-item .ph {
+  color: #b6bdc9;
+}
+
+.child {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eef1f5;
+}
+
+.child:last-child {
+  border-bottom: none;
+}
+
+.child-title {
+  font-size: 27rpx;
+}

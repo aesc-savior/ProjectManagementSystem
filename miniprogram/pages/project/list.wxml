@@ -1,0 +1,60 @@
+<view class="page">
+  <view class="stat-grid">
+    <view class="stat" bindtap="loadStats">
+      <view class="num brand">{{stats.projectCount}}</view>
+      <view class="lbl">我的项目</view>
+    </view>
+    <view class="stat" bindtap="toTask">
+      <view class="num">{{stats.taskTodo}}</view>
+      <view class="lbl">我的待办任务</view>
+    </view>
+    <view class="stat" bindtap="toApproval">
+      <view class="num {{stats.approvalPending > 0 ? 'danger' : ''}}">{{stats.approvalPending}}</view>
+      <view class="lbl">待我审批</view>
+    </view>
+    <view class="stat" bindtap="toFine">
+      <view class="num {{stats.fineUnpaid > 0 ? 'danger' : ''}}">{{stats.fineUnpaid}}</view>
+      <view class="lbl">未缴罚款 · ¥{{stats.fineAmount}}</view>
+    </view>
+  </view>
+
+  <view class="notice-bar" wx:if="{{stats.noticeUnsigned > 0}}" bindtap="toNotice">
+    <text>有 {{stats.noticeUnsigned}} 条公告待签收</text>
+    <text class="arrow">去签收 ›</text>
+  </view>
+
+  <view class="search mt24">
+    <input value="{{keyword}}" bindinput="onKeyword" placeholder="搜索项目名称或编号"
+           placeholder-class="ph" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="clear" bindtap="onClearKeyword">×</text>
+  </view>
+
+  <block wx:if="{{loaded && !list.length}}">
+    <mp-empty text="{{error ? '加载失败' : '还没有项目'}}" sub="{{error}}" action="{{error ? '重试' : ''}}" bind:action="resetList" />
+  </block>
+
+  <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetail">
+    <view class="item-top">
+      <view class="item-title">{{item.name}}</view>
+      <mp-tag text="{{item.statusText}}" type="{{item.statusType}}" />
+    </view>
+    <view class="item-meta">
+      <text>{{item.projectNo}}</text>
+      <text>{{item.ownerName}}</text>
+      <text wx:if="{{item.overdueText}}" class="danger-text">{{item.overdueText}}</text>
+      <text wx:else>截止 {{item.endText}}</text>
+    </view>
+    <view class="progress-row">
+      <view class="progress flex1">
+        <view class="progress-inner {{item.progress >= 100 ? 'done' : ''}}" style="width:{{item.progress}}%"></view>
+      </view>
+      <text class="pct">{{item.progress}}%</text>
+    </view>
+    <view class="item-foot">
+      <text>任务 {{item.doneCount}}/{{item.taskCount}}</text>
+      <text class="more">查看详情 ›</text>
+    </view>
+  </view>
+
+  <mp-loadmore loading="{{loading}}" hasMore="{{hasMore}}" total="{{total}}" />
+</view>

@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="card">
+    <view class="card-title">后端接口地址</view>
+    <view class="card-sub">手机直连时填电脑的局域网地址，例如 http://192.168.1.100:9999/pm/api/mp</view>
+
+    <input class="url-input" value="{{draft}}" bindinput="onInput" placeholder="http://ip:端口/pm/api/mp"
+           placeholder-class="ph" />
+
+    <view class="btn-row mt16">
+      <view class="btn btn-plain" bindtap="onTest">{{pinging ? '测试中…' : '测试连接'}}</view>
+      <view class="btn btn-primary" bindtap="onSave">保存并重新登录</view>
+    </view>
+
+    <view wx:if="{{result}}" class="result {{resultOk ? 'ok' : 'bad'}}">{{result}}</view>
+
+    <view class="divider"></view>
+    <view class="hint">当前生效：{{current}}</view>
+    <view class="btn btn-plain mt16" bindtap="onReset">恢复默认地址</view>
+  </view>
+
+  <view class="card">
+    <view class="entry">
+      <view class="flex1">
+        <view>离线演示模式</view>
+        <view class="hint">不连后端，用内置假数据跑界面</view>
+      </view>
+      <switch checked="{{offline}}" color="#2f6fed" bindchange="onToggleOffline" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">手机连不上时按这个顺序查</view>
+    <view class="step">1. 手机和电脑连同一个 Wi-Fi（不要一个连 5G 一个连 2.4G 的不同网段）</view>
+    <view class="step">2. 电脑上 ipconfig 拿到 IPv4 地址，浏览器访问 http://该IP:9999/pm/api/mp/ping 有 JSON 返回</view>
+    <view class="step">3. Windows 防火墙放行 9999 端口（Tomcat 第一次启动会弹窗，选允许）</view>
+    <view class="step">4. 微信开发者工具「预览」后，右下角开启「调试」再扫码，否则 http 会被拦</view>
+    <view class="step">5. 地址要带上下文路径 /pm/api/mp，少 /pm 会 404</view>
+  </view>
+</view>

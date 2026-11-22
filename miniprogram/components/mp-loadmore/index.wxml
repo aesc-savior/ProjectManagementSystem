@@ -1,0 +1,9 @@
+<view class="mp-loadmore">
+  <view wx:if="{{loading}}" class="mp-loadmore-text">
+    <view class="mp-loadmore-dot"></view>
+    <view class="mp-loadmore-dot"></view>
+    <view class="mp-loadmore-dot"></view>
+    <text>加载中</text>
+  </view>
+  <text wx:elif="{{!hasMore && total > 0}}" class="mp-loadmore-text">共 {{total}} 条，没有更多了</text>
+</view>

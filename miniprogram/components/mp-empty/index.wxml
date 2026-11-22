@@ -1,0 +1,6 @@
+<view class="mp-empty">
+  <view class="mp-empty-art"></view>
+  <view class="mp-empty-text">{{text}}</view>
+  <view wx:if="{{sub}}" class="mp-empty-sub">{{sub}}</view>
+  <view wx:if="{{action}}" class="mp-empty-btn" bindtap="onTap">{{action}}</view>
+</view>

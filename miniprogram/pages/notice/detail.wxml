@@ -1,0 +1,32 @@
+<view class="page" wx:if="{{notice}}">
+  <view class="card">
+    <view class="title">{{notice.title}}</view>
+    <view class="meta">
+      <text>{{notice.publisher}}</text>
+      <text>{{notice.createTime}}</text>
+    </view>
+    <view class="meta" wx:if="{{notice.expireTime}}">
+      <text class="danger-text">有效期至 {{notice.expireTime}}</text>
+    </view>
+    <view class="divider"></view>
+    <view class="content">{{notice.content || '（无正文）'}}</view>
+    <view class="divider"></view>
+    <view class="hint">已签收 {{notice.readCount}} 人 · 范围：{{notice.scope === 'ALL' ? '全员' : (notice.projectName || '项目')}}</view>
+  </view>
+
+  <view class="footer-space" wx:if="{{!notice.signed}}"></view>
+  <view class="footer-bar" wx:if="{{!notice.signed}}">
+    <view class="btn btn-primary {{signing ? 'disabled' : ''}}" bindtap="onSign">
+      {{signing ? '提交中…' : '签收公告'}}
+    </view>
+  </view>
+  <view class="signed-tip" wx:else>你已签收该公告</view>
+</view>
+
+<view class="page" wx:elif="{{loading}}">
+  <mp-empty text="正在加载…" />
+</view>
+
+<view class="page" wx:else>
+  <mp-empty text="加载失败" sub="{{error}}" action="重试" bind:action="load" />
+</view>

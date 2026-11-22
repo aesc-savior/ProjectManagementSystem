@@ -1,0 +1,70 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/project/list",
+    "pages/project/detail",
+    "pages/task/list",
+    "pages/task/detail",
+    "pages/approval/list",
+    "pages/approval/detail",
+    "pages/approval/apply",
+    "pages/fine/list",
+    "pages/fine/detail",
+    "pages/notice/list",
+    "pages/notice/detail",
+    "pages/mine/index",
+    "pages/dev/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "项目管理",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f6f8",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#8a94a6",
+    "selectedColor": "#2f6fed",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/project/list",
+        "text": "项目",
+        "iconPath": "images/tab-project.png",
+        "selectedIconPath": "images/tab-project-on.png"
+      },
+      {
+        "pagePath": "pages/task/list",
+        "text": "任务",
+        "iconPath": "images/tab-task.png",
+        "selectedIconPath": "images/tab-task-on.png"
+      },
+      {
+        "pagePath": "pages/approval/list",
+        "text": "审批",
+        "iconPath": "images/tab-approval.png",
+        "selectedIconPath": "images/tab-approval-on.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "images/tab-mine.png",
+        "selectedIconPath": "images/tab-mine-on.png"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 15000,
+    "uploadFile": 30000,
+    "downloadFile": 30000
+  },
+  "usingComponents": {
+    "mp-tag": "/components/mp-tag/index",
+    "mp-empty": "/components/mp-empty/index",
+    "mp-loadmore": "/components/mp-loadmore/index"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,39 @@
+<view class="page" wx:if="{{fine}}">
+  <view class="hero">
+    <view class="lbl">罚款金额</view>
+    <view class="amount">¥ {{fine.amountText}}</view>
+    <mp-tag text="{{fine.statusText}}" type="{{fine.statusType}}" />
+  </view>
+
+  <view class="card">
+    <view class="row"><text class="k">罚款单号</text><text class="v mono">FINE-{{fine.id}}</text></view>
+    <view class="row"><text class="k">所属项目</text><text class="v brand-text" bindtap="toProject">{{fine.projectName}} ›</text></view>
+    <view class="row"><text class="k">被罚人</text><text class="v">{{fine.userName}}</text></view>
+    <view class="row" wx:if="{{fine.dueDate}}"><text class="k">超期截止日</text><text class="v">{{fine.dueDate}}</text></view>
+    <view class="row"><text class="k">生成时间</text><text class="v">{{fine.createTime}}</text></view>
+    <view class="row" wx:if="{{fine.payTime}}"><text class="k">缴纳时间</text><text class="v">{{fine.payTime}}</text></view>
+    <view class="row" wx:if="{{fine.tradeNo}}"><text class="k">交易号</text><text class="v mono">{{fine.tradeNo}}</text></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">罚款说明</view>
+    <view class="reason">{{fine.reason}}</view>
+    <view class="divider"></view>
+    <view class="hint">计费规则：项目超期天数 × 100 元/天，由项目负责人承担。</view>
+  </view>
+
+  <view class="footer-space" wx:if="{{canPay}}"></view>
+  <view class="footer-bar" wx:if="{{canPay}}">
+    <view class="btn btn-primary {{paying ? 'disabled' : ''}}" bindtap="onPay">
+      {{paying ? '处理中…' : '立即缴纳 ¥' + fine.amountText}}
+    </view>
+  </view>
+</view>
+
+<view class="page" wx:elif="{{loading}}">
+  <mp-empty text="正在加载…" />
+</view>
+
+<view class="page" wx:else>
+  <mp-empty text="加载失败" sub="{{error}}" action="重试" bind:action="load" />
+</view>

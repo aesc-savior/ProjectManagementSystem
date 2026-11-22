@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="profile">
+    <view class="avatar">{{initial}}</view>
+    <view class="flex1">
+      <view class="name">{{user.userName || '未登录'}}</view>
+      <view class="sub">{{user.roleName}} · {{user.dept || '未设置部门'}}</view>
+      <view class="sub">{{user.loginId}}</view>
+    </view>
+  </view>
+
+  <view class="stat-grid">
+    <view class="stat" bindtap="toApproval">
+      <view class="num {{stats.approvalPending > 0 ? 'brand' : ''}}">{{stats.approvalPending || 0}}</view>
+      <view class="lbl">待我审批</view>
+    </view>
+    <view class="stat" bindtap="toFine">
+      <view class="num {{stats.fineUnpaid > 0 ? 'danger' : ''}}">{{stats.fineUnpaid || 0}}</view>
+      <view class="lbl">未缴罚款 / ¥{{stats.fineAmount || 0}}</view>
+    </view>
+    <view class="stat" bindtap="toNotice">
+      <view class="num">{{stats.noticeUnsigned || 0}}</view>
+      <view class="lbl">待签公告</view>
+    </view>
+    <view class="stat">
+      <view class="num">{{stats.taskTodo || 0}}</view>
+      <view class="lbl">待办任务</view>
+    </view>
+  </view>
+
+  <view class="card mt24">
+    <view class="entry" bindtap="toFine">
+      <text>罚款台账</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="entry" bindtap="toNotice">
+      <text>通知公告</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="entry" bindtap="toDev">
+      <text>服务器设置</text>
+      <text class="hint">{{env}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="entry" bindtap="onLogout">
+      <text>退出登录</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="entry" bindtap="onUnbind">
+      <text class="danger-text">解绑微信</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="hint center">项目管理系统 · 微信小程序端 v1.0</view>
+</view>

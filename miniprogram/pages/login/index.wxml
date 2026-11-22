@@ -1,0 +1,44 @@
+<view class="login">
+  <view class="brand">
+    <view class="logo">项</view>
+    <view class="name">项目管理系统</view>
+    <view class="slogan">审批 · 罚款 · 项目协作，手机随时处理</view>
+  </view>
+
+  <view wx:if="{{checking}}" class="login-card">
+    <view class="checking">正在识别微信身份…</view>
+  </view>
+
+  <view wx:else class="login-card">
+    <block wx:if="{{needBind}}">
+      <view class="card-title">绑定平台账号</view>
+      <view class="card-sub">首次使用需要把微信与平台账号关联，之后自动登录</view>
+
+      <view class="form-item">
+        <view class="form-label">登录账号</view>
+        <input class="form-input" value="{{loginId}}" data-field="loginId" bindinput="onInput"
+               placeholder="如 admin / zhangming" placeholder-class="ph" />
+      </view>
+      <view class="form-item">
+        <view class="form-label">密码</view>
+        <input class="form-input" password value="{{password}}" data-field="password" bindinput="onInput"
+               placeholder="请输入密码" placeholder-class="ph" />
+      </view>
+
+      <view wx:if="{{error}}" class="error-text">{{error}}</view>
+
+      <view class="btn btn-primary mt24 {{loading ? 'disabled' : ''}}" bindtap="onBind">
+        {{loading ? '绑定中…' : '绑定并登录'}}
+      </view>
+    </block>
+
+    <view wx:else class="reconnect">
+      <view class="error-text">{{error}}</view>
+      <view class="btn btn-primary mt24" bindtap="autoLogin">重新连接</view>
+    </view>
+  </view>
+
+  <view class="foot">
+    <text class="link" bindtap="toDev">服务器地址：{{base}}</text>
+  </view>
+</view>
