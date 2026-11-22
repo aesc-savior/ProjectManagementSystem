@@ -33,6 +33,10 @@ public class ApprovalServlet extends HttpServlet {
                 redirect(req, resp, "/approval?action=list", "任务不存在");
                 return;
             }
+            if ("DONE".equals(task.get("status")) || "CANCELED".equals(task.get("status"))) {
+                redirect(req, resp, "/approval?action=list", "任务已完成或已取消，无需申请延期");
+                return;
+            }
             boolean allowed = uid.equals(task.get("assignee_id"))
                     || (Web.isPm(req) && ProjectDao.canManage(task.get("project_id"), uid, Web.role(req), admin));
             if (!allowed) {
@@ -45,6 +49,8 @@ public class ApprovalServlet extends HttpServlet {
         }
 
         req.setAttribute("pending", ApprovalDao.pending(uid, admin));
+        // 列表只取前 100 条，计数要单独查，否则待办数显示不准
+        req.setAttribute("pendingCount", Long.valueOf(ApprovalDao.countPending(uid, admin)));
         req.setAttribute("mine", ApprovalDao.mine(uid));
         req.getRequestDispatcher("/approval/list.jsp").forward(req, resp);
     }
