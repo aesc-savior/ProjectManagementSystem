@@ -26,6 +26,8 @@ DROP TABLE IF EXISTS pm_task;
 DROP TABLE IF EXISTS pm_project_member;
 DROP TABLE IF EXISTS pm_project;
 DROP TABLE IF EXISTS pm_user;
+DROP TABLE IF EXISTS pm_meeting_attendee;
+DROP TABLE IF EXISTS pm_meeting;
 
 -- ---------------------------------------------------------------------
 -- 用户
@@ -248,7 +250,7 @@ CREATE TABLE pm_remind (
   id          BIGINT       NOT NULL AUTO_INCREMENT,
   user_id     BIGINT       NOT NULL,
   user_name   VARCHAR(64)  DEFAULT NULL,
-  type        VARCHAR(16)  NOT NULL COMMENT 'WEEKLY',
+  type        VARCHAR(16)  NOT NULL COMMENT 'WEEKLY/MEETING',
   title       VARCHAR(128) NOT NULL,
   content     VARCHAR(500) DEFAULT NULL,
   target_url  VARCHAR(255) DEFAULT NULL,
@@ -261,6 +263,50 @@ CREATE TABLE pm_remind (
   KEY idx_remind_type (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站内提醒';
 
+
+-- 会议
+CREATE TABLE pm_meeting (
+    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    topic         VARCHAR(255) NOT NULL COMMENT '会议主题',
+    project_id    BIGINT       NOT NULL DEFAULT 0 COMMENT '关联项目，0=不关联',
+    start_time    DATETIME     NOT NULL COMMENT '开始时间',
+    end_time      DATETIME     NOT NULL COMMENT '结束时间',
+    location      VARCHAR(255) DEFAULT NULL COMMENT '地点',
+    agenda        TEXT         COMMENT '议程',
+    organizer_id  BIGINT       DEFAULT NULL COMMENT '组织人ID',
+    organizer     VARCHAR(64)  DEFAULT NULL COMMENT '组织人姓名快照',
+    status        VARCHAR(16)  NOT NULL DEFAULT 'PUBLISHED' COMMENT 'PUBLISHED/CANCELED',
+    cancel_reason VARCHAR(500) DEFAULT NULL COMMENT '取消理由',
+    cancel_time   DATETIME     DEFAULT NULL COMMENT '取消时间',
+    attach_name   VARCHAR(255) DEFAULT NULL COMMENT '附件原名',
+    attach_path   VARCHAR(500) DEFAULT NULL COMMENT '相对上传目录的路径',
+    attach_size   BIGINT       NOT NULL DEFAULT 0 COMMENT '附件字节数',
+    create_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time   DATETIME     DEFAULT NULL COMMENT '最后修改时间',
+    creator       VARCHAR(64)  DEFAULT NULL COMMENT '创建人姓名快照',
+    del_flag      TINYINT      NOT NULL DEFAULT 0 COMMENT '0正常/1删除',
+    PRIMARY KEY (id),
+    KEY idx_meeting_time (start_time),
+    KEY idx_meeting_project (project_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议';
+
+-- 会议参会人与回执
+CREATE TABLE pm_meeting_attendee (
+    id           BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    meeting_id   BIGINT      NOT NULL COMMENT '会议ID',
+    user_id      BIGINT      NOT NULL COMMENT '参会人ID',
+    user_name    VARCHAR(64) DEFAULT NULL COMMENT '姓名快照',
+    reply_status VARCHAR(16) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING/ACCEPTED/DECLINED',
+    reply_reason VARCHAR(500) DEFAULT NULL COMMENT '请假理由',
+    reply_time   DATETIME    DEFAULT NULL COMMENT '回执时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_meeting_user (meeting_id, user_id),
+    KEY idx_attendee_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='会议参会人与回执';
+
+-- =====================================================================
+-- 演示数据（密码均为 123456）
+-- =====================================================================
 -- =====================================================================
 -- 演示数据（密码均为 123456）
 -- =====================================================================
@@ -325,3 +371,20 @@ INSERT INTO pm_log (user_id, user_name, action, target, detail, ip) VALUES
 ('3', '李四', 'SUBMIT', 'weekly:1', '提交 2026-W45 周报', '127.0.0.1');
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO pm_meeting(topic, project_id, start_time, end_time, location, agenda,
+                       organizer_id, organizer, status, create_time)
+SELECT '官网改版周例会', p.id, '2026-11-27 14:00:00', '2026-11-27 15:00:00',
+       '三楼会议室', '1. 本周进度\n2. 联调风险',
+       u.id, u.user_name, 'PUBLISHED', '2026-11-20 10:00:00'
+FROM pm_project p, pm_user u
+WHERE p.project_no = 'PM-2026-0001' AND u.login_id = 'pm';
+
+SET @meetingId = (SELECT id FROM pm_meeting
+                  WHERE topic = '官网改版周例会' ORDER BY id DESC LIMIT 1);
+
+INSERT INTO pm_meeting_attendee(meeting_id, user_id, user_name, reply_status)
+SELECT @meetingId, u.id, u.user_name,
+       CASE WHEN u.login_id = 'pm' THEN 'ACCEPTED' ELSE 'PENDING' END
+FROM pm_user u
+WHERE u.login_id IN ('pm', 'member', 'viewer');

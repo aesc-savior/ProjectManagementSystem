@@ -1,0 +1,12 @@
+.banner {
+  background: #fdf3e3;
+  color: #b45309;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.more {
+  color: #2f6fed;
+}

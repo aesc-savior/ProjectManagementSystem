@@ -1,0 +1,50 @@
+.summary {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.summary .lbl {
+  font-size: 23rpx;
+  color: #9ca3af;
+}
+
+.summary .amount {
+  font-size: 52rpx;
+  font-weight: 500;
+  color: #e5484d;
+  margin-top: 6rpx;
+}
+
+.summary .right {
+  text-align: right;
+}
+
+.summary .cnt {
+  font-size: 34rpx;
+  color: #1f2937;
+  margin-top: 6rpx;
+}
+
+.money {
+  font-size: 40rpx;
+  font-weight: 500;
+  color: #e5484d;
+  margin-top: 12rpx;
+}
+
+.reason {
+  font-size: 23rpx;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18rpx;
+}

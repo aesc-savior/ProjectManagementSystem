@@ -1,0 +1,45 @@
+.url-input {
+  margin-top: 20rpx;
+  height: 84rpx;
+  padding: 0 22rpx;
+  background: #f7f9fc;
+  border-radius: 14rpx;
+  font-size: 26rpx;
+  font-family: Menlo, Consolas, monospace;
+}
+
+.url-input .ph {
+  color: #b6bdc9;
+  font-family: -apple-system, "PingFang SC", sans-serif;
+}
+
+.result {
+  margin-top: 20rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 14rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.result.ok {
+  background: #e9f7ee;
+  color: #15803d;
+}
+
+.result.bad {
+  background: #fdeceb;
+  color: #b91c1c;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+}
+
+.step {
+  font-size: 25rpx;
+  color: #4b5563;
+  line-height: 1.8;
+  margin-top: 8rpx;
+}

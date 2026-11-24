@@ -1,0 +1,58 @@
+<view class="page" wx:if="{{project}}">
+  <view class="card">
+    <view class="item-top">
+      <view class="item-title">{{project.name}}</view>
+      <mp-tag text="{{project.statusText}}" type="{{project.statusType}}" />
+    </view>
+    <view class="item-meta">
+      <text>{{project.projectNo}}</text>
+      <text>{{project.ownerName}}</text>
+      <text wx:if="{{project.dept}}">{{project.dept}}</text>
+    </view>
+
+    <view class="progress-row">
+      <view class="progress flex1">
+        <view class="progress-inner {{project.progress >= 100 ? 'done' : ''}}" style="width:{{project.progress}}%"></view>
+      </view>
+      <text class="pct">{{project.progress}}%</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="row"><text class="k">项目类型</text><text class="v">{{project.typeText}}</text></view>
+    <view class="row"><text class="k">优先级</text><text class="v">{{project.priorityText}}</text></view>
+    <view class="row"><text class="k">计划周期</text><text class="v">{{project.startDate || '未设置'}} → {{project.endDate || '未设置'}}</text></view>
+    <view class="row">
+      <text class="k">超期情况</text>
+      <text class="v {{project.overdueDays > 0 ? 'danger-text' : ''}}">
+        {{project.overdueDays > 0 ? '已超期 ' + project.overdueDays + ' 天' : '未超期'}}
+      </text>
+    </view>
+    <view class="row"><text class="k">任务完成</text><text class="v">{{project.doneCount}} / {{project.taskCount}}</text></view>
+    <view class="row" wx:if="{{project.description}}"><text class="k">项目说明</text><text class="v">{{project.description}}</text></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">项目成员（{{members.length}}）</view>
+    <view wx:if="{{!members.length}}" class="hint mt16">还没有添加项目成员</view>
+    <view class="member" wx:for="{{members}}" wx:key="user_id">
+      <view class="avatar">{{item.initial}}</view>
+      <view class="flex1">
+        <view class="m-name">{{item.user_name}}</view>
+        <view class="hint">{{item.dept_name || '—'}}</view>
+      </view>
+      <mp-tag text="{{item.role_code === 'MANAGER' ? '项目管理员' : '成员'}}" type="{{item.role_code === 'MANAGER' ? 'primary' : 'default'}}" />
+    </view>
+  </view>
+
+  <view class="btn btn-primary" bindtap="toTasks">查看该项目任务</view>
+  <view class="hint center mt16">公告、周报等模块在 PC 端处理</view>
+</view>
+
+<view class="page" wx:elif="{{loading}}">
+  <mp-empty text="正在加载…" />
+</view>
+
+<view class="page" wx:else>
+  <mp-empty text="加载失败" sub="{{error}}" action="重试" bind:action="load" />
+</view>

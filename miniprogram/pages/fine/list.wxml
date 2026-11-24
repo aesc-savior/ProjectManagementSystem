@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="summary">
+    <view class="left">
+      <view class="lbl">待缴合计</view>
+      <view class="amount">¥ {{summary.amount}}</view>
+    </view>
+    <view class="right">
+      <view class="lbl">笔数</view>
+      <view class="cnt">{{summary.count}}</view>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view wx:for="{{tabs}}" wx:key="key" class="tab {{status === item.key ? 'active' : ''}}"
+          data-key="{{item.key}}" bindtap="onTab">{{item.text}}</view>
+  </view>
+
+  <block wx:if="{{loaded && !list.length}}">
+    <mp-empty text="{{error ? '加载失败' : '没有罚款记录'}}" sub="{{error}}"
+              action="{{error ? '重试' : ''}}" bind:action="resetList" />
+  </block>
+
+  <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetail">
+    <view class="item-top">
+      <view class="item-title">{{item.projectName}}</view>
+      <mp-tag text="{{item.statusText}}" type="{{item.statusType}}" />
+    </view>
+    <view class="money">¥ {{item.amountText}}</view>
+    <view class="item-meta">
+      <text>{{item.projectNo}}</text>
+      <text>{{item.userName}}</text>
+      <text wx:if="{{item.dueDate}}">超期截止 {{item.dueDate}}</text>
+    </view>
+    <view class="item-foot">
+      <text class="reason">{{item.reason}}</text>
+    </view>
+    <view class="pay-row" wx:if="{{item.canPay}}">
+      <view class="btn btn-sm btn-primary" data-id="{{item.id}}" data-amount="{{item.amountText}}"
+            catchtap="onPay">立即缴纳</view>
+    </view>
+  </view>
+
+  <mp-loadmore loading="{{loading}}" hasMore="{{hasMore}}" total="{{total}}" />
+  <view class="hint center mt16">罚款规则：项目超期 100 元/天，由项目负责人承担</view>
+</view>

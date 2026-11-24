@@ -1,0 +1,67 @@
+<view class="page" wx:if="{{item}}">
+  <view class="card">
+    <view class="item-top">
+      <view class="item-title">{{item.title}}</view>
+      <mp-tag text="{{item.statusText}}" type="{{item.statusType}}" />
+    </view>
+    <view class="item-meta">
+      <text>{{item.projectName || '—'}}</text>
+      <text>{{item.timeText}}</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="row"><text class="k">申请人</text><text class="v">{{item.applicant}}</text></view>
+    <view class="row">
+      <text class="k">审批人</text>
+      <text class="v">{{item.approverName || '管理员（申请人即项目负责人）'}}</text>
+    </view>
+    <view class="row"><text class="k">关联任务</text><text class="v brand-text" bindtap="toTask">{{item.taskTitle || '查看任务'}} ›</text></view>
+    <view class="row"><text class="k">申请时间</text><text class="v">{{item.createTime}}</text></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">截止日变更</view>
+    <view class="date-compare">
+      <view class="cell">
+        <text class="lbl">原截止日</text>
+        <text class="val">{{item.oldText}}</text>
+      </view>
+      <text class="arrow">→</text>
+      <view class="cell">
+        <text class="lbl">申请改为</text>
+        <text class="val brand-text bold">{{item.newText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">延期原因</view>
+    <view class="reason">{{item.detail || '未填写'}}</view>
+  </view>
+
+  <view class="card" wx:if="{{item.opinion}}">
+    <view class="card-title">审批意见</view>
+    <view class="reason">{{item.opinion}}</view>
+    <view class="hint mt8">处理时间：{{item.approveTime || '—'}}</view>
+  </view>
+
+  <view class="card" wx:if="{{canDecide}}">
+    <view class="card-title">处理</view>
+    <view class="hint">驳回必须填写意见；通过后任务截止日自动更新</view>
+    <view class="btn-row mt24">
+      <view class="btn btn-danger {{saving ? 'disabled' : ''}}" bindtap="onReject">驳回</view>
+      <view class="btn btn-primary {{saving ? 'disabled' : ''}}" bindtap="onPass">通过</view>
+    </view>
+  </view>
+
+  <view class="hint center" wx:elif="{{item.status !== 'PENDING'}}">该申请已处理，无需重复操作</view>
+</view>
+
+<view class="page" wx:elif="{{loading}}">
+  <mp-empty text="正在加载…" />
+</view>
+
+<view class="page" wx:else>
+  <mp-empty text="加载失败" sub="{{error}}" action="重试" bind:action="load" />
+</view>

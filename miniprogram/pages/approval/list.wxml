@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="tabs">
+    <view wx:for="{{tabs}}" wx:key="key" class="tab {{tab === item.key ? 'active' : ''}}"
+          data-key="{{item.key}}" bindtap="onTab">
+      {{item.text}}<text wx:if="{{item.key === 'pending' && counts.pending > 0}}" class="dot">{{counts.pending}}</text>
+    </view>
+  </view>
+
+  <view class="apply-bar">
+    <text class="hint">任务做不完？提前申请延期，避免超期罚款</text>
+    <view class="btn btn-sm btn-primary" bindtap="toApply">发起申请</view>
+  </view>
+
+  <block wx:if="{{loaded && !list.length}}">
+    <mp-empty text="{{error ? '加载失败' : (tab === 'pending' ? '没有待你审批的事项' : '暂无记录')}}"
+              sub="{{error}}" action="{{error ? '重试' : ''}}" bind:action="resetList" />
+  </block>
+
+  <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetail">
+    <view class="item-top">
+      <view class="item-title">{{item.title}}</view>
+      <mp-tag text="{{item.statusText}}" type="{{item.statusType}}" />
+    </view>
+
+    <view class="date-compare">
+      <view class="cell">
+        <text class="lbl">原截止</text>
+        <text class="val">{{item.oldText}}</text>
+      </view>
+      <text class="arrow">→</text>
+      <view class="cell">
+        <text class="lbl">申请改为</text>
+        <text class="val brand-text bold">{{item.newText}}</text>
+      </view>
+    </view>
+
+    <view class="hint reason">{{item.detail}}</view>
+
+    <view class="item-foot">
+      <text>{{item.applicant}} · {{item.projectName || '—'}}</text>
+      <text>{{item.timeText}}</text>
+    </view>
+  </view>
+
+  <mp-loadmore loading="{{loading}}" hasMore="{{hasMore}}" total="{{total}}" />
+</view>

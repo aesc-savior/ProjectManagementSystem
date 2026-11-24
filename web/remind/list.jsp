@@ -13,11 +13,12 @@
 <div class="page-title">
     <div>
         <h2>站内提醒</h2>
-        <div class="sub">未读 <b><%= unread %></b> 条；周报催交提醒汇总在此。</div>
+        <div class="sub">未读 <b><%= unread %></b> 条；周报催交提醒、会议通知汇总在此。</div>
     </div>
     <div class="flex">
         <a class="btn" href="<%= ctx %>/remind?action=list">全部</a>
         <a class="btn" href="<%= ctx %>/remind?action=list&type=WEEKLY">周报</a>
+        <a class="btn" href="<%= ctx %>/remind?action=list&type=MEETING">会议</a>
         <a class="btn btn-primary" href="<%= ctx %>/remind?action=readAll">全部已读</a>
     </div>
 </div>
@@ -31,8 +32,8 @@
         <tbody>
         <% for (Map<String, String> r : rows) {
             String type = r.get("type");
-            String badge = "badge badge-pending";
-            String typeText = "周报";
+            String badge = "MEETING".equals(type) ? "badge badge-borrowed" : "badge badge-pending";
+            String typeText = "MEETING".equals(type) ? "会议" : "周报";
             boolean unreadRow = "0".equals(r.get("read_flag"));
             String url = r.get("target_url");
         %>

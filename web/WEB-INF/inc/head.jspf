@@ -111,6 +111,36 @@
         }
     }
 
+    private String replyText(String v) {
+        if ("ACCEPTED".equals(v)) {
+            return "参加";
+        }
+        if ("DECLINED".equals(v)) {
+            return "请假";
+        }
+        return "待回执";
+    }
+
+    private String replyBadge(String v) {
+        if ("ACCEPTED".equals(v)) {
+            return "badge badge-approved";
+        }
+        if ("DECLINED".equals(v)) {
+            return "badge badge-rejected";
+        }
+        return "badge badge-pending";
+    }
+
+    private String meetingBadge(String text) {
+        if ("已取消".equals(text)) {
+            return "badge badge-destroyed";
+        }
+        if ("已结束".equals(text)) {
+            return "badge badge-returned";
+        }
+        return "badge badge-borrowed";
+    }
+
 %>
 <%
     String ctx = request.getContextPath();
@@ -150,6 +180,7 @@
             <a class="<%= "weekly".equals(active) ? "active" : "" %>" href="<%= ctx %>/weekly?action=list">项目周报</a>
             <a class="<%= "doc".equals(active) ? "active" : "" %>" href="<%= ctx %>/doc?action=list">项目文档</a>
             <a class="<%= "notice".equals(active) ? "active" : "" %>" href="<%= ctx %>/notice?action=list">通知公告</a>
+            <a class="<%= "meeting".equals(active) ? "active" : "" %>" href="<%= ctx %>/meeting?action=list">会议管理</a>
             <a class="<%= "remind".equals(active) ? "active" : "" %>" href="<%= ctx %>/remind?action=list">站内提醒<%= unreadRemind > 0 ? "（" + unreadRemind + "）" : "" %></a>
             <div class="group">流程与考核</div>
             <a class="<%= "approval".equals(active) ? "active" : "" %>" href="<%= ctx %>/approval?action=list">审批中心</a>

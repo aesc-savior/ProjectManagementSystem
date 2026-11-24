@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="card">
+    <view class="card-title">任务延期申请</view>
+    <view class="card-sub">提交后由项目负责人审批；申请人即负责人时转交管理员</view>
+
+    <view class="form-item" wx:if="{{!taskId}}">
+      <view class="form-label">选择任务（我负责的）</view>
+      <picker mode="selector" range="{{taskNames}}" value="{{taskIndex}}" bindchange="onPickTask">
+        <view class="picker-box">
+          {{taskId ? taskTitle : (taskNames.length ? '点击选择任务' : '没有可申请的任务')}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item" wx:else>
+      <view class="form-label">申请任务</view>
+      <view class="form-readonly">{{taskTitle || '任务 ' + taskId}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">原截止日期</view>
+      <view class="form-readonly">{{oldDate || '未设置'}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">新的截止日期（必须晚于原截止日）</view>
+      <picker mode="date" value="{{newDate}}" start="{{minDate}}" bindchange="onDate">
+        <view class="picker-box {{newDate ? '' : 'ph'}}">{{newDate || '请选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">延期原因</view>
+      <textarea class="form-textarea" value="{{reason}}" bindinput="onReason" maxlength="500"
+                placeholder="说明为什么不能在原截止日前完成，例如：客户补充需求、依赖方延期…"
+                placeholder-class="ph" />
+      <view class="hint right">{{reason.length}}/500</view>
+    </view>
+  </view>
+
+  <view class="hint">提示：审批通过后任务截止日自动更新；超期未完成会按 100 元/天生成罚款单。</view>
+
+  <view class="btn btn-primary mt24 {{submitting ? 'disabled' : ''}}" bindtap="submit">
+    {{submitting ? '提交中…' : '提交申请'}}
+  </view>
+</view>

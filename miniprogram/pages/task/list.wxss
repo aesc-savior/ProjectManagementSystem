@@ -1,0 +1,60 @@
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.chip {
+  flex: none;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 22rpx;
+  border-radius: 32rpx;
+  background: #fff;
+  color: #6b7280;
+  font-size: 24rpx;
+  max-width: 300rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip.on {
+  background: #eaf1fe;
+  color: #2f6fed;
+}
+
+.filter-row .search {
+  margin-bottom: 0;
+  height: 64rpx;
+  padding: 0 20rpx;
+  border-radius: 32rpx;
+}
+
+.filter-row .search input {
+  height: 64rpx;
+  font-size: 25rpx;
+}
+
+.search .ph {
+  color: #b6bdc9;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  margin-top: 6rpx;
+}
+
+.pct {
+  margin-left: 16rpx;
+  font-size: 23rpx;
+  color: #8a94a6;
+  width: 70rpx;
+  text-align: right;
+}
+
+.more {
+  color: #2f6fed;
+}

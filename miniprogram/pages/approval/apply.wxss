@@ -1,0 +1,25 @@
+.picker-box {
+  height: 76rpx;
+  line-height: 76rpx;
+  padding: 0 20rpx;
+  background: #f7f9fc;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #1f2937;
+}
+
+.picker-box.ph {
+  color: #b6bdc9;
+}
+
+.form-item .ph {
+  color: #b6bdc9;
+}
+
+.form-textarea {
+  background: #f7f9fc;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  margin-top: 10rpx;
+}
