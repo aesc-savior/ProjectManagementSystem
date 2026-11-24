@@ -19,7 +19,7 @@ import java.util.Map;
 public class Db {
 
     public static final String URL = pick("pm.db.url", "PM_DB_URL",
-            "jdbc:mysql://localhost:3306/pm?useUnicode=true&characterEncoding=UTF-8"
+            "jdbc:mysql://localhost:3366/pm?useUnicode=true&characterEncoding=UTF-8"
                     + "&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true");
     public static final String USER = pick("pm.db.user", "PM_DB_USER", "root");
     public static final String PASSWORD = pick("pm.db.password", "PM_DB_PASSWORD", "123456");

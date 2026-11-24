@@ -1,0 +1,5 @@
+-- 扩展 pm_doc 表结构
+ALTER TABLE pm_doc 
+ADD COLUMN description VARCHAR(500) DEFAULT NULL COMMENT '文档说明' AFTER name,
+ADD COLUMN tags VARCHAR(255) DEFAULT NULL COMMENT '标签，逗号分隔' AFTER description,
+ADD COLUMN category VARCHAR(64) DEFAULT NULL COMMENT '分类/文件夹' AFTER tags;
