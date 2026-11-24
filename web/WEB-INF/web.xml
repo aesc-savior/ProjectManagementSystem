@@ -82,6 +82,20 @@
         <url-pattern>/notice</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>meeting</servlet-name>
+        <servlet-class>pm.web.MeetingServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>20971520</max-file-size>
+            <max-request-size>26214400</max-request-size>
+            <file-size-threshold>1048576</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>meeting</servlet-name>
+        <url-pattern>/meeting</url-pattern>
+    </servlet-mapping>
+
     <!-- 审批 -->
     <servlet>
         <servlet-name>approval</servlet-name>

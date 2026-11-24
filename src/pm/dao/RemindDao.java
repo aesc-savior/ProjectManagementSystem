@@ -9,19 +9,26 @@ public class RemindDao {
     // 同一个人、同类型、同标题一天只写一条，免得定时任务刷屏；返回新 id，0 表示没写
     public static long add(String userId, String userName, String type,
                            String title, String content, String targetUrl) {
+        return add(userId, userName, type, title, content, targetUrl, true);
+    }
+
+    public static long add(String userId, String userName, String type,
+                           String title, String content, String targetUrl, boolean dedupe) {
         if (!Db.isId(userId)) {
             return 0L;
         }
-        long dup = Db.queryLong("select count(*) from pm_remind where user_id=" + userId
-                + " and type='" + Db.esc(type) + "' and title='" + Db.esc(title) + "'"
-                + " and date(create_time)=curdate()");
-        if (dup > 0) {
-            return 0L;
+        if (dedupe) {
+            long dup = Db.queryLong("select count(*) from pm_remind where user_id=" + userId
+                    + " and type='" + Db.esc(type) + "' and title='" + Db.esc(title) + "'"
+                    + " and date(create_time)=curdate()");
+            if (dup > 0) {
+                return 0L;
+            }
         }
-        Db.update("insert into pm_remind(user_id,user_name,type,title,content,target_url,read_flag,create_time)"
-                + " values(" + userId + ",'" + Db.esc(userName) + "','" + Db.esc(type) + "','"
-                + Db.esc(title) + "','" + Db.esc(content) + "','" + Db.esc(targetUrl) + "',0,'"
-                + Db.now() + "')");
+        Db.update("insert into pm_remind(user_id,user_name,type,title,content,target_url,"
+                + "read_flag,create_time) values(" + userId + ",'" + Db.esc(userName) + "','"
+                + Db.esc(type) + "','" + Db.esc(title) + "','" + Db.esc(content) + "','"
+                + Db.esc(targetUrl) + "',0,'" + Db.now() + "')");
         return Db.queryLong("select max(id) from pm_remind where user_id=" + userId);
     }
 

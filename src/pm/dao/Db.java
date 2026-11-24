@@ -19,10 +19,10 @@ import java.util.Map;
 public class Db {
 
     public static final String URL = pick("pm.db.url", "PM_DB_URL",
-            "jdbc:mysql://localhost:3306/pm?useUnicode=true&characterEncoding=UTF-8"
+            "jdbc:mysql://localhost:3366/pm?useUnicode=true&characterEncoding=UTF-8"
                     + "&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true");
     public static final String USER = pick("pm.db.user", "PM_DB_USER", "root");
-    public static final String PASSWORD = pick("pm.db.password", "PM_DB_PASSWORD", "123456");
+    public static final String PASSWORD = pick("pm.db.password", "PM_DB_PASSWORD", "123");
     public static final String API_TOKEN = pick("pm.api.token", "PM_API_TOKEN", "pm-demo-token");
 
     static {
@@ -98,6 +98,18 @@ public class Db {
             return "";
         }
         return s.trim().replace("'", "''");
+    }
+
+    public static long insert(String sql) {
+        try (Connection conn = open();
+             Statement st = conn.createStatement()) {
+            st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+            try (ResultSet rs = st.getGeneratedKeys()) {
+                return rs.next() ? rs.getLong(1) : 0L;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("执行失败：" + sql, e);
+        }
     }
 
     // 只允许纯数字主键，防止 id 参数注入
