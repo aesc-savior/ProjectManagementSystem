@@ -92,7 +92,8 @@
                 <!-- 查询按钮，点击后提交GET请求，把选中的条件拼到URL后面。 -->
                 <button class="btn btn-primary" type="submit">查询</button>
                 <!-- 重置按钮，点击后跳转回首页/doc?action=list并清空所有搜索条件 -->
-                <a class="btn" href="<%= ctx %>/doc?action=list">重置</a>
+                <!-- 添加了条件isRecycle=isRecycleStr，修正在回收站点击重置会回到首页的bug -->
+                <a class="btn" href="<%= ctx %>/doc?action=list&isRecycle=<%=isRecycleStr%>">重置</a>
             </div>
         </div>
     </form>
@@ -194,7 +195,6 @@
             Map<String, String> r = rows.get(i);
             long size = 0; //把文件大小转为数字
             try { size = Long.parseLong(r.get("size")); } catch (Exception e) { }
-            boolean canDelete = isAdmin || uid.equals(r.get("uploader_id"));//删除权限判断
 
             String sizeStr = "";
             if (size > 1024 * 1024) {
@@ -224,12 +224,10 @@
                 <% } else { %>
                 <a class="btn btn-sm" href="<%= ctx %>/doc?action=preview&id=<%= r.get("id") %>" target="_blank">预览</a>
                 <a class="btn btn-sm" href="<%= ctx %>/doc?action=download&id=<%= r.get("id") %>">下载</a>
-                <% if (canDelete) {//有无删除权限 %>
                 <button class="btn btn-sm" onclick="editDoc('<%= r.get("id") %>', '<%= h(r.get("name")) %>', '<%= h(r.get("description")) %>', '<%= h(r.get("tags")) %>')">编辑</button>
                 <form method="post" action="<%= ctx %>/doc?action=delete&id=<%= r.get("id") %>" style="display:inline" onsubmit="return confirm('确认移入回收站？')">
                     <button class="btn btn-sm btn-danger" type="submit">删除</button>
                 </form>
-                <% } %>
                 <% } %>
             </td>
         </tr>

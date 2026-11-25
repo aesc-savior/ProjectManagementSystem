@@ -123,12 +123,21 @@ public class DocServlet extends HttpServlet {
                     || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
                 DocDao.delete(d.get("id"));//根据id移入回收站
                 LogDao.write(Web.uid(req), Web.uname(req), "DELETE", "doc:" + d.get("id"), "移入回收站：" + d.get("name"), Web.ip(req));
+                redirect(req, resp, "/doc?action=list", "操作成功");
+            } else {
+                redirect(req, resp, "/doc?action=list", "权限不足，无法删除");
             }
-            redirect(req, resp, "/doc?action=list", "操作成功");
         }
         else if ("restore".equals(action)) {//从回收站恢复
-            DocDao.restore(Web.p(req, "id"));
-            redirect(req, resp, "/doc?action=list&isRecycle=1", "文档已恢复");
+            Map<String, String> d = DocDao.get(Web.p(req, "id"));
+            if (d != null && (Web.isAdmin(req)  //管理员、对应项目的项目经理和上传者才可以恢复
+                    || Web.uid(req).equals(d.get("uploader_id"))
+                    || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
+                DocDao.restore(d.get("id"));
+                redirect(req, resp, "/doc?action=list&isRecycle=1", "文档已恢复");
+            } else {
+                redirect(req, resp, "/doc?action=list&isRecycle=1", "权限不足，无法恢复");
+            }
         }
         else if ("forceDelete".equals(action)) {//调用彻底删除
             Map<String, String> d = DocDao.get(Web.p(req, "id"));
@@ -137,13 +146,22 @@ public class DocServlet extends HttpServlet {
                     || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
                 DocDao.forceDelete(d.get("id"));
                 LogDao.write(Web.uid(req), Web.uname(req), "DELETE", "doc:" + d.get("id"), "彻底删除：" + d.get("name"), Web.ip(req));
+                redirect(req, resp, "/doc?action=list&isRecycle=1", "文档已彻底删除");
+            } else {
+                redirect(req, resp, "/doc?action=list&isRecycle=1", "权限不足，无法彻底删除");
             }
-
-            redirect(req, resp, "/doc?action=list&isRecycle=1", "文档已彻底删除");
         }
         else if ("updateInfo".equals(action)) { //编辑功能
-            DocDao.updateInfo(Web.p(req, "id"), Web.p(req, "name"), Web.p(req, "description"), Web.p(req, "tags"));
-            redirect(req, resp, "/doc?action=list", "文档信息已更新");
+            Map<String, String> d = DocDao.get(Web.p(req, "id"));
+            if (d != null && (Web.isAdmin(req)  //管理员、对应项目的项目经理和上传者才可以编辑
+                    || Web.uid(req).equals(d.get("uploader_id"))
+                    || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
+                DocDao.updateInfo(Web.p(req, "id"), Web.p(req, "name"), Web.p(req, "description"), Web.p(req, "tags"));
+                LogDao.write(Web.uid(req), Web.uname(req), "UPDATE", "doc:" + d.get("id"), "修改文档：" + d.get("name"), Web.ip(req));
+                redirect(req, resp, "/doc?action=list", "文档信息已更新");
+            } else {
+                redirect(req, resp, "/doc?action=list", "权限不足，无法修改");
+            }
         }
         else {  //回文档管理首页
             resp.sendRedirect(contextPath + "/doc?action=list");
@@ -441,6 +459,19 @@ public class DocServlet extends HttpServlet {
         }
         String encodedMsg = URLEncoder.encode(msg, "UTF-8");//提示编码为中午防止乱码
         String fullUrl = req.getContextPath() + path + a + "msg=" + encodedMsg;//根目录+路径+提示文字
+
+        // 如果权限不足，弹窗提示并跳转
+        if (msg != null && msg.contains("权限不足")) {
+            resp.setContentType("text/html;charset=UTF-8");
+            PrintWriter out = resp.getWriter();
+            out.println("<script type='text/javascript'>");
+            out.println("alert('" + msg + "');");
+            out.println("window.location.href='" + fullUrl + "';");
+            out.println("</script>");
+            out.flush();
+            return;
+        }
+
         resp.sendRedirect(fullUrl);
     }
 }
