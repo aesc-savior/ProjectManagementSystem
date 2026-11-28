@@ -54,6 +54,8 @@
             <label>项目筛选</label><!-- 项目下拉框 -->
             <select name="projectId" onchange="location.href='<%= ctx %>/doc?action=list&isRecycle=<%=isRecycleStr%>&projectId=' + this.value;">
                 <option value="">全部项目</option><!-- 项目筛选的第一项 -->
+                <!--其他公开文档的下拉框按钮，传值public给后端-->
+                <option value="public" <% if ("public".equals(projectId)) { %>selected<% } %>>其他公开文档</option>
                 <% for (int i = 0; i < projects.size(); i++) {
                     Map<String, String> p = projects.get(i); %><!-- 根据权限循环为项目筛选提供选项 -->
                 <option value="<%= p.get("id") %>" <% if (p.get("id").equals(projectId)) { %>selected<% } %>><%= h(p.get("name")) %></option>
@@ -100,7 +102,7 @@
 </div>
 
 <!-- 上传文档部分页面 -->
-<% if (!projects.isEmpty() && !isViewer && !"1".equals(isRecycleStr)) { %><!-- 不是游客且有项目且在首页而非回收站 -->
+<% if (!projects.isEmpty() && !isViewer && !"1".equals(isRecycleStr)) { %><!-- 不是游客且有项目且在首页(不在回收站) -->
 <div class="card">
     <h3>上传文档</h3>
     <form class="flex" method="post" action="<%= ctx %>/doc?action=upload" enctype="multipart/form-data" style="flex-wrap: wrap; gap: 10px;">
@@ -187,7 +189,9 @@
             <% if (!"1".equals(isRecycleStr)) { %><!-- 文档管理首页 -->
             <th style="width:40px;"><input type="checkbox" onclick="checkAll(this)"></th><!-- 全选 -->
             <% } %>
-            <th>文件名</th><th>说明</th><th>标签</th><th>项目</th><th>大小</th><th>上传人</th><th>操作</th>
+            <th>文件名</th>
+            <th>版本号</th>
+            <th>说明</th><th>标签</th><th>项目</th><th>大小</th><th>上传人</th><th>操作</th>
         </tr>
         </thead>
         <tbody>
@@ -208,6 +212,7 @@
             <td><input type="checkbox" name="docId" value="<%= r.get("id") %>"></td>
             <% } %>
             <td><%= h(r.get("name")) %></td>
+            <td>v<%= r.get("version") %></td>
             <td><%= h(r.get("description")) %></td>
             <td><%= h(r.get("tags")) %></td>
             <td><%= h(r.get("project_name")) %></td>
@@ -224,6 +229,7 @@
                 <% } else { %>
                 <a class="btn btn-sm" href="<%= ctx %>/doc?action=preview&id=<%= r.get("id") %>" target="_blank">预览</a>
                 <a class="btn btn-sm" href="<%= ctx %>/doc?action=download&id=<%= r.get("id") %>">下载</a>
+                <a class="btn btn-sm" href="<%= ctx %>/doc?action=history&id=<%= r.get("id") %>">历史版本</a>
                 <button class="btn btn-sm" onclick="editDoc('<%= r.get("id") %>', '<%= h(r.get("name")) %>', '<%= h(r.get("description")) %>', '<%= h(r.get("tags")) %>')">编辑</button>
                 <form method="post" action="<%= ctx %>/doc?action=delete&id=<%= r.get("id") %>" style="display:inline" onsubmit="return confirm('确认移入回收站？')">
                     <button class="btn btn-sm btn-danger" type="submit">删除</button>

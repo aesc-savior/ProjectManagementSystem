@@ -51,6 +51,36 @@ public class DocServlet extends HttpServlet {
         if ("preview".equals(action)) { preview(req, resp); return; }
         if ("export".equals(action)) { exportExcel(req, resp); return; }
 
+        //查看历史版本
+        if ("history".equals(action)) {
+            String id = Web.p(req, "id");
+            Map<String, String> d = DocDao.get(id);//先判断被查看历史版本的文档是否存在，有没有权限
+            if (d == null) {
+                redirect(req, resp, "/doc?action=list", "文档不存在");
+                return;
+            }
+            if (!canAccess(d, req)) {
+                redirect(req, resp, "/doc?action=list", "权限不足");
+                return;
+            }
+
+            //去数据库查出同项目、同任务、同文件名的所有版本
+            List<Map<String, String>> allHistory = DocDao.listHistory(d.get("project_id"), d.get("task_id"), d.get("name"));
+
+            //循环遍历每个版本进行权限检查
+            List<Map<String, String>> allowedHistory = new ArrayList<Map<String, String>>();
+            for (Map<String, String> version : allHistory) {
+                if (canAccess(version, req)) {
+                    allowedHistory.add(version);//如果有权限看，放入这里
+                }
+            }
+
+            req.setAttribute("rows", allowedHistory);
+            req.setAttribute("docName", d.get("name"));
+            req.getRequestDispatcher("/doc/history.jsp").forward(req, resp);
+            return;
+        }
+
         String projectId = Web.p(req, "projectId");
         String taskId = Web.p(req, "taskId");
         String status = Web.p(req, "status");
@@ -84,16 +114,17 @@ public class DocServlet extends HttpServlet {
 
         //搜索区任务下拉框，如果搜索区选中了一个项目则列出项目里有的任务
         List<Map<String, String>> searchTasks = new ArrayList<Map<String, String>>();
-        if (projectId != null && !projectId.isEmpty()) {
+        //如果是“其他公开文档”则无所谓属于哪个任务，不然隶属的任务太多
+        if (projectId != null && !projectId.isEmpty() && !"public".equals(projectId)) {
             searchTasks = DocDao.listTreeTasks(projectId);
         }
         req.setAttribute("searchTasks", searchTasks);
 
         List<Map<String, String>> uploadTasks = new ArrayList<Map<String, String>>();
         List<Map<String, String>> uploadMembers = new ArrayList<Map<String, String>>();
-            if (uploadProjectId != null && !uploadProjectId.trim().isEmpty()) {
+        if (uploadProjectId != null && !uploadProjectId.trim().isEmpty()) {
             uploadTasks = DocDao.listTreeTasks(uploadProjectId);
-            // 如果在上传区选了具体任务，就查任务相关人员；否则查全项目成员(用于指定人员才能查看文档的权限设置)
+            //如果在上传区选了具体任务，就查任务相关人员；否则查全项目成员(用于指定人员才能查看文档的权限设置)
             if (uploadTaskId != null && !uploadTaskId.trim().isEmpty()) {
                 uploadMembers = DocDao.listTaskMembers(uploadProjectId, uploadTaskId, Web.uid(req));
             } else {
@@ -123,7 +154,12 @@ public class DocServlet extends HttpServlet {
                     || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
                 DocDao.delete(d.get("id"));//根据id移入回收站
                 LogDao.write(Web.uid(req), Web.uname(req), "DELETE", "doc:" + d.get("id"), "移入回收站：" + d.get("name"), Web.ip(req));
-                redirect(req, resp, "/doc?action=list", "操作成功");
+
+                if ("1".equals(Web.p(req, "returnHistory"))) {//在历史版本界面执行删除则重定向回历史版本界面
+                    redirect(req, resp, "/doc?action=history&id=" + d.get("id"), "操作成功");
+                } else {//否则回到文档管理首页(没别的界面有删除)
+                    redirect(req, resp, "/doc?action=list", "操作成功");
+                }
             } else {
                 redirect(req, resp, "/doc?action=list", "权限不足，无法删除");
             }
@@ -141,7 +177,7 @@ public class DocServlet extends HttpServlet {
         }
         else if ("forceDelete".equals(action)) {//调用彻底删除
             Map<String, String> d = DocDao.get(Web.p(req, "id"));
-            if (d != null && (Web.isAdmin(req)//同删除条件判断，管理员、对应项目的项目经理和上传者      (是否冗余？本来就看不到不在权限的回收站内文档？)
+            if (d != null && (Web.isAdmin(req)//同删除条件判断，管理员、对应项目的项目经理和上传者
                     || Web.uid(req).equals(d.get("uploader_id"))
                     || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
                 DocDao.forceDelete(d.get("id"));
@@ -158,9 +194,27 @@ public class DocServlet extends HttpServlet {
                     || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
                 DocDao.updateInfo(Web.p(req, "id"), Web.p(req, "name"), Web.p(req, "description"), Web.p(req, "tags"));
                 LogDao.write(Web.uid(req), Web.uname(req), "UPDATE", "doc:" + d.get("id"), "修改文档：" + d.get("name"), Web.ip(req));
-                redirect(req, resp, "/doc?action=list", "文档信息已更新");
+
+                if ("1".equals(Web.p(req, "returnHistory"))) {
+                    redirect(req, resp, "/doc?action=history&id=" + d.get("id"), "文档信息已更新");
+                } else {
+                    redirect(req, resp, "/doc?action=list", "文档信息已更新");
+                }
             } else {
                 redirect(req, resp, "/doc?action=list", "权限不足，无法修改");
+            }
+        }
+
+        else if ("rollback".equals(action)) {//回滚
+            Map<String, String> d = DocDao.get(Web.p(req, "id"));//如果是管理员或该项目项目经理或文档上传者，可进行回滚
+            if (d != null && (Web.isAdmin(req)
+                    || Web.uid(req).equals(d.get("uploader_id"))
+                    || (Web.isPm(req) && ProjectDao.canManage(d.get("project_id"), Web.uid(req), Web.role(req), false)))) {
+                DocDao.rollback(d.get("id"));
+                LogDao.write(Web.uid(req), Web.uname(req), "UPDATE", "doc:" + d.get("id"), "回滚历史版本：" + d.get("name"), Web.ip(req));
+                redirect(req, resp, "/doc?action=history&id=" + d.get("id"), "回滚成功");
+            } else {
+                redirect(req, resp, "/doc?action=list", "权限不足，无法回滚");
             }
         }
         else {  //回文档管理首页
@@ -382,21 +436,26 @@ public class DocServlet extends HttpServlet {
                 String[] lines = allText.split("\n");//根据csv的特点以换行符划分行
                 out.println("<table border='1' cellspacing='0' cellpadding='6' style='border-collapse: collapse; width:100%; text-align:left;'>");
 
-            for (int i = 0; i < lines.length; i++) {//逐行写入
-                String line = lines[i].trim();//获取要写入的整行的文本内容
-                if (line.isEmpty()) continue;
-                out.println("<tr>");//行开头
-                String[] cells = line.split(",");//用逗号分隔的各个单元格
-                for (int k = 0; k < cells.length; k++) {//逐个单元格写入
-                    String cell = cells[k];
-                    if (i == 0) out.println("<th style='background:#eee;'>" + cell.trim() + "</th>");//表头
-                    else out.println("<td>" + cell.trim() + "</td>");
+                for (int i = 0; i < lines.length; i++) {//逐行写入
+                    String line = lines[i].trim();//获取要写入的整行的文本内容
+                    if (line.isEmpty()) continue;
+                    out.println("<tr>");//行开头
+                    String[] cells = line.split(",");//用逗号分隔的各个单元格
+                    for (int k = 0; k < cells.length; k++) {//逐个单元格写入
+                        String cell = cells[k];
+                        if (i == 0) out.println("<th style='background:#eee;'>" + cell.trim() + "</th>");//表头
+                        else out.println("<td>" + cell.trim() + "</td>");
+                    }
+                    out.println("</tr>");
                 }
-                out.println("</tr>");
-            }
-            out.println("</table>");
-        } else {
-                out.println("<div style='text-align:center; padding:50px; color:#666;'><h3>该格式的文档暂不支持在线渲染</h3><p>请直接使用下载功能。</p></div>");
+                out.println("</table>");
+            } else {
+                //无法渲染则提供下载按钮
+                out.println("<div style='text-align:center; padding:50px; color:#666;'>");
+                out.println("<h3>该格式（" + ext.toUpperCase() + "）暂不支持在线渲染</h3>");
+                out.println("<p>由于系统底层环境限制，请直接使用下载功能查看。</p>");
+                out.println("<a href='" + req.getContextPath() + "/doc?action=download&id=" + d.get("id") + "' class='btn btn-primary' style='margin-top:20px; display:inline-block; padding:10px 20px; text-decoration:none; background:#007bff; color:#fff; border-radius:5px;'>下载文档</a>");
+                out.println("</div>");
             }
         } catch (Exception e) {
             out.println("<div style='color:red; text-align:center;'>解析失败：" + e.getMessage() + "</div>");

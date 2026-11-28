@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DocDao {
-//项目文档相关查询：项目文档表、项目名称与状态、上传文档的用户名称
+    //项目文档相关查询：项目文档表、项目名称与状态、上传文档的用户名称
 // select
 //    pm_doc.id,
 //    pm_doc.project_id,
@@ -43,15 +43,38 @@ public class DocDao {
         if ("1".equals(isRecycle)) w.add("d.del_flag=1 and p.del_flag=0");//回收站
         else w.add("d.del_flag=0 and p.del_flag=0");//或正常列表
 
-        if (Db.isId(projectId)){          //如果传入的参数projectId确实是一个已知项目
-            w.add("d.project_id=" + projectId);    //就只查这个项目————否则查所有项目的文档
-        if (Db.isId(taskId)) w.add("d.task_id=" + taskId);}   //任务依托于项目
+        boolean isPublicTab = "public".equals(projectId);//搜索筛选栏选择“其他公开文档”
+        if (isPublicTab) {
+            w.add("d.visibility = 'PUBLIC'");
+            //查询不属于自己项目的公开文档
+            w.add("p.id NOT IN (select project_id from pm_project_member where user_id=" + Db.esc(uid) + ") and p.owner_id != " + Db.esc(uid));
+        } else {
+            if (Db.isId(projectId)){          //如果传入的参数projectId确实是一个已知项目
+                w.add("d.project_id=" + projectId);    //就只查这个项目，否则查所有项目的文档
+                if (Db.isId(taskId)) w.add("d.task_id=" + taskId);}   //任务依托于项目
+        }
+
         if (status != null && !status.trim().isEmpty()) w.add("p.status='" + Db.esc(status) + "'");
 //有输入且输入不是空值 调用.esc自动转义防SQL注入
         if (keyword != null && !keyword.trim().isEmpty()) {
             String k = Db.esc(keyword);
             w.add("(d.name like '%" + k + "%' or d.description like '%" + k + "%' or d.tags like '%" + k + "%')");
         }//模糊搜索，项目文档搜索输入框
+
+        if (!"1".equals(isRecycle)) { //不在回收站
+            //判断当前用户能看到哪些版本的文档，只能看到自己权限能看到的最新版本
+            String permCondition = "(d2.visibility='PUBLIC' or d2.uploader_id=" + Db.esc(uid);
+            if (all) {
+                permCondition += " or 1=1"; //管理员全部可见
+            } else {//仅项目成员可见且你是项目成员或你是指定成员
+                permCondition += " or (d2.visibility='PROJECT' and exists(select 1 from pm_project_member m where m.project_id=d2.project_id and m.user_id=" + Db.esc(uid) + "))";
+                permCondition += " or exists(select 1 from pm_doc_permission dp where dp.doc_id=d2.id and dp.user_id=" + Db.esc(uid) + ")";
+            }
+            permCondition += ")";
+
+            //找同项目、同任务、同名文档中，用户可见的最大版本号
+            w.add(" d.version = (SELECT MAX(d2.version) FROM pm_doc d2 WHERE d2.project_id = d.project_id AND d2.task_id = d.task_id AND d2.name = d.name AND d2.del_flag = 0 AND " + permCondition + ") ");
+        }
 
         String order = " order by d.create_time desc";//默认按上传时间大小倒叙排列，即新的在上边
         if ("name_asc".equals(orderBy)) order = " order by d.name asc";//选择按名称正序排列
@@ -64,7 +87,11 @@ public class DocDao {
             }
             where += w.get(i);
         }
-        where += ProjectDao.scope(uid, all);//调用来自ProjectDao的权限判断函数scope
+
+        if (!isPublicTab) {//不是公开文档
+            where += ProjectDao.scope(uid, all);//调用来自ProjectDao的权限判断函数scope
+        }
+
         return Db.query(BASE_SELECT + where + order + " limit 200");
     }
 
@@ -103,14 +130,22 @@ public class DocDao {
         return Db.queryOne(BASE_SELECT + " where d.id=" + id);
     }
 
-    public static int nextVersion(String projectId, String name) {//未完成！版本号的更新！
-        int v = 1;   //问题1：是否管回收站里的文档的版本号 问题2：改名改成同名怎么处理
-        return v;    //问题3：不同任务同名文档怎么处理
+    public static int nextVersion(String projectId, String taskId, String name) {//上传和编辑改名时的最新版本号
+        String finalTaskId = "0";//要求属于同一项目同一任务的才算同名文档需要不同版本号区分(同一项目无所属任务的各个文档也要区分)
+        if (taskId != null && !taskId.trim().isEmpty() && !"null".equals(taskId)) {
+            finalTaskId = taskId;
+        }
+
+        String sql = "select ifnull(max(version), 0) from pm_doc " +
+                "where project_id=" + Db.esc(projectId) +
+                " and task_id=" + Db.esc(finalTaskId) +
+                " and name='" + Db.esc(name) + "'";
+        return (int) Db.queryLong(sql) + 1;
     }
 
     public static void add(String projectId, String taskId, String name, String ext, long size,
                            String path, String visibility, String uploaderId, String description, String tags) {
-        int version = nextVersion(projectId, name);//暂时使用这个获取新存入文档应得的版本号
+        int version = nextVersion(projectId, taskId, name);//获取新存入文档应得的版本号
         if (path != null) path = path.replace('\\', '/');// 替换防止数据库内存的路径乱码
         String docTaskId = "0"; //未关联则设置关联任务ID为0方便辨认
         if (Db.isId(taskId)) {  //文档是否关联着一个任务？
@@ -125,8 +160,16 @@ public class DocDao {
 
     public static void updateInfo(String id, String name, String description, String tags) {
         if (Db.isId(id)) {
-            Db.update("update pm_doc set name='" + Db.esc(name) + "', description='" + Db.esc(description)
-                    + "', tags='" + Db.esc(tags) + "' where id=" + id); //不修改文件内容，只修改名字、描述和标签
+            Map<String, String> old = get(id);
+            if (old != null) {
+                int version = Integer.parseInt(old.get("version"));
+                //如改名则重新计算版本号
+                if (!old.get("name").equals(name)) {
+                    version = nextVersion(old.get("project_id"), old.get("task_id"), name);
+                }
+                Db.update("update pm_doc set name='" + Db.esc(name) + "', version=" + version + ", description='" + Db.esc(description)
+                        + "', tags='" + Db.esc(tags) + "' where id=" + id); //不修改文件内容，只修改名字、描述、标签和对应的版本号
+            }
         }  //暂定不修改create_time
     }
 
@@ -156,5 +199,24 @@ public class DocDao {
     }
     public static boolean hasPermission(String docId, String userId) {  //哪些是”指定人员“
         return Db.queryLong("select count(*) from pm_doc_permission where doc_id=" + docId + " and user_id=" + userId) > 0;
+    }
+
+    public static List<Map<String, String>> listHistory(String projectId, String taskId, String name) {//查询历史版本
+        String finalTaskId = "0";
+        if (taskId != null && !taskId.trim().isEmpty()) {
+            finalTaskId = taskId;
+        }//不在回收站且属于同一项目同一任务且文件名相同，按版本号倒序排列
+        String sql = BASE_SELECT + " where d.del_flag=0 and d.project_id=" + Db.esc(projectId) +
+                " and d.task_id=" + Db.esc(finalTaskId) + " and d.name='" + Db.esc(name) + "' order by d.version desc";
+        return Db.query(sql);
+    }
+
+    public static void rollback(String id) {//回滚
+        Map<String, String> d = get(id);
+        if (d != null) {
+            int nextV = nextVersion(d.get("project_id"), d.get("task_id"), d.get("name"));
+            //将旧版本的版本号改为最大值+1，并把创建时间更新为当前时间，使其成为最新版本
+            Db.update("update pm_doc set version=" + nextV + ", create_time='" + Db.now() + "' where id=" + id);
+        }
     }
 }

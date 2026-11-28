@@ -1,0 +1,3 @@
+USE pm;
+
+ALTER TABLE pm_project ADD COLUMN actual_cost DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '实际花费';
